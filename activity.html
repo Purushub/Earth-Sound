@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earth Physics Lab — 3D Two-Team Battle Arena</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+  <style>
+    :root {
+      --navy: #07131e;
+      --navy-card: rgba(13, 27, 42, 0.88);
+      --navy-card-border: rgba(56, 189, 248, 0.22);
+      --paper: #f1f5f9;
+      --muted: #94a3b8;
+      --orange: #f97316;
+      --orange-glow: rgba(249, 115, 22, 0.45);
+      --teal: #06b6d4;
+      --teal-glow: rgba(6, 182, 212, 0.45);
+      --green: #22c55e;
+      --coral: #ef4444;
+      --gold: #eab308;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--navy);
+      color: var(--paper);
+      font-family: var(--font);
+    }
+    #canvas-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+
+    /* HUD OVERLAY */
+    .hud-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .interactive { pointer-events: auto; }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: linear-gradient(180deg, rgba(7, 19, 30, 0.95) 0%, rgba(7, 19, 30, 0.6) 80%, transparent 100%);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(12px);
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(249, 115, 22, 0.3));
+      border: 1.5px solid rgba(56, 189, 248, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 16px rgba(6, 182, 212, 0.3);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: 0.12em;
+    }
+
+    /* TOP TOPIC SELECTOR */
+    .topic-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.75);
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .topic-step-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .topic-step-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .topic-step-btn.active {
+      color: #07131e;
+      background: linear-gradient(135deg, #38bdf8, #22d3ee);
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+      font-weight: 800;
+    }
+    .topic-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+    }
+
+    /* TOP RIGHT AUDIO & TIMER */
+    .top-right-tools {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .music-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      padding: 4px 12px;
+    }
+    .music-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .music-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+    .music-bar {
+      width: 3px;
+      height: 4px;
+      background: var(--teal);
+      border-radius: 1px;
+      animation: bar-pulse 0.8s ease-in-out infinite alternate;
+    }
+    .music-bar:nth-child(2) { animation-delay: 0.2s; height: 10px; }
+    .music-bar:nth-child(3) { animation-delay: 0.4s; height: 14px; }
+    .music-bar:nth-child(4) { animation-delay: 0.1s; height: 8px; }
+    .music-bars.paused .music-bar { animation: none; height: 4px; }
+    @keyframes bar-pulse {
+      0% { height: 3px; }
+      100% { height: 14px; }
+    }
+    .volume-slider {
+      width: 55px;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+    .timer-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+    .timer-pill.urgent {
+      border-color: var(--coral);
+      color: var(--coral);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+      animation: pulse-red 1s infinite alternate;
+    }
+    @keyframes pulse-red {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* MAIN BATTLE GRID: LEFT CONSOLE, CENTER SIMULATION (EMPTY HUD SPACE), RIGHT CONSOLE */
+    .arena-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(310px, 360px) 1fr minmax(310px, 360px);
+      gap: 16px;
+      padding: 12px 20px 8px 20px;
+      height: calc(100vh - 128px);
+    }
+
+    /* TEAM COLUMN CONTAINER */
+    .team-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      max-height: 100%;
+      overflow: hidden;
+    }
+
+    /* TEAM HEADER CARD */
+    .team-header-card {
+      background: var(--navy-card);
+      border: 1.5px solid;
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: all 0.25s ease;
+    }
+    .team-header-card.team-left {
+      border-color: rgba(249, 115, 22, 0.5);
+    }
+    .team-header-card.team-left.active-turn {
+      border-color: var(--orange);
+      box-shadow: 0 0 24px var(--orange-glow);
+      background: rgba(30, 24, 18, 0.95);
+    }
+    .team-header-card.team-right {
+      border-color: rgba(6, 182, 212, 0.5);
+    }
+    .team-header-card.team-right.active-turn {
+      border-color: var(--teal);
+      box-shadow: 0 0 24px var(--teal-glow);
+      background: rgba(10, 30, 38, 0.95);
+    }
+
+    .team-info-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-badge-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #07131e;
+    }
+    .badge-orange {
+      background: linear-gradient(135deg, #fb923c, #ea580c);
+      box-shadow: 0 0 14px rgba(249, 115, 22, 0.5);
+    }
+    .badge-teal {
+      background: linear-gradient(135deg, #38bdf8, #0891b2);
+      box-shadow: 0 0 14px rgba(6, 182, 212, 0.5);
+    }
+    .team-names h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .team-names small {
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .team-score-block {
+      text-align: right;
+    }
+    .team-score-num {
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .score-orange { color: #fed7aa; }
+    .score-teal { color: #a5f3fc; }
+    .team-streak-tag {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 3px;
+    }
+
+    /* QUESTION CONSOLE DIRECTLY BELOW TEAM NAME */
+    .question-console-card {
+      flex: 1;
+      background: var(--navy-card);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      transition: all 0.25s ease;
+      overflow-y: auto;
+    }
+    .question-console-card.active-turn {
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+    .console-header-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .topic-tag {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      text-transform: uppercase;
+    }
+    .tag-orange { color: var(--orange); border: 1px solid rgba(249, 115, 22, 0.3); }
+    .tag-teal { color: var(--teal); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .q-number-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .question-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      line-height: 1.35;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+    .question-clue {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      padding-left: 8px;
+      border-left: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* ANSWER OPTIONS LIST */
+    .answer-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .opt-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1.25;
+    }
+    .opt-btn:hover:not(:disabled) {
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(30, 41, 59, 0.9);
+      transform: translateY(-1px);
+    }
+    .opt-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+    .opt-btn.selected-orange {
+      background: rgba(249, 115, 22, 0.25);
+      border-color: var(--orange);
+      box-shadow: 0 0 12px var(--orange-glow);
+      color: #fff;
+    }
+    .opt-btn.selected-teal {
+      background: rgba(6, 182, 212, 0.25);
+      border-color: var(--teal);
+      box-shadow: 0 0 12px var(--teal-glow);
+      color: #fff;
+    }
+    .opt-btn.correct-ans {
+      background: linear-gradient(90deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.5)) !important;
+      border-color: var(--green) !important;
+      box-shadow: 0 0 14px rgba(34, 197, 94, 0.6) !important;
+      color: #fff !important;
+    }
+    .opt-btn.wrong-ans {
+      background: rgba(239, 68, 68, 0.3) !important;
+      border-color: var(--coral) !important;
+      color: #fca5a5 !important;
+    }
+    .opt-letter {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* BUZZER AND ACTION BUTTONS */
+    .console-action-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: auto;
+    }
+    .buzz-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid;
+      font-size: 0.82rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .buzz-orange {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      border-color: #f97316;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+    }
+    .buzz-orange:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.7);
+    }
+    .buzz-teal {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+    }
+    .buzz-teal:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.7);
+    }
+    .buzz-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+    .buzz-btn:disabled {
+      background: rgba(51, 65, 85, 0.4);
+      border-color: rgba(100, 116, 139, 0.3);
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .lock-btn {
+      width: 100%;
+      padding: 8px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(30, 41, 59, 0.8);
+      color: #ffffff;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lock-btn:hover:not(:disabled) {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+    .lock-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* CENTER VIEWPORT CONTROLS BAR */
+    .center-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 8px;
+    }
+    .sim-controls-dock {
+      background: rgba(7, 19, 30, 0.9);
+      border: 1.5px solid rgba(56, 189, 248, 0.35);
+      border-radius: 16px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+    .sim-dock-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--teal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sim-control-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: #e2e8f0;
+      font-weight: 700;
+    }
+    .sim-control-item input[type="range"] {
+      width: 80px;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+    .sim-action-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .sim-action-btn:hover {
+      background: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    /* BOTTOM BROADCAST FOOTER */
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px;
+      background: linear-gradient(0deg, rgba(7, 19, 30, 0.95) 0%, rgba(7, 19, 30, 0.7) 80%, transparent 100%);
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    .broadcast-msg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .live-pulse {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--coral);
+      box-shadow: 0 0 10px var(--coral);
+      animation: live-blink 1.2s infinite ease-in-out;
+    }
+    @keyframes live-blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.8); }
+    }
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .secondary-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e2e8f0;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .secondary-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .next-topic-btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      border: none;
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 14px rgba(6, 182, 212, 0.4);
+      transition: all 0.2s;
+    }
+    .next-topic-btn:hover {
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.7);
+      transform: translateY(-1px);
+    }
+
+    /* VICTORY CELEBRATION MODAL */
+    .victory-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.88);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .victory-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .victory-card {
+      width: min(520px, 92vw);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(7, 19, 30, 0.98));
+      border: 2px solid rgba(234, 179, 8, 0.6);
+      box-shadow: 0 0 50px rgba(234, 179, 8, 0.35);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      animation: modal-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modal-pop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .trophy-glow {
+      font-size: 58px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 20px rgba(234, 179, 8, 0.8));
+      animation: float 2.5s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .victory-card h2 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #fef08a;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .victory-card p {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 18px;
+    }
+    .final-score-row {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 22px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .final-team-box h4 {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .final-team-box span {
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+    .victory-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .rematch-btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      border: none;
+      color: #07131e;
+      font-size: 0.85rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(234, 179, 8, 0.5);
+    }
+
+    /* ==========================================================
+       MASCOT RIGHT / WRONG ANSWER FEEDBACK MODAL
+       ========================================================== */
+    .mascot-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.86);
+      backdrop-filter: blur(16px);
+      z-index: 120;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mascot-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mascot-modal-card {
+      width: min(580px, 94vw);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(7, 19, 30, 0.99) 100%);
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(56, 189, 248, 0.25);
+      transform: scale(0.9) translateY(15px);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+    .mascot-modal-backdrop.open .mascot-modal-card {
+      transform: scale(1) translateY(0);
+    }
+    .mascot-modal-card.correct-mode {
+      border-color: rgba(34, 197, 94, 0.7);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 45px rgba(34, 197, 94, 0.35);
+    }
+    .mascot-modal-card.wrong-mode {
+      border-color: rgba(239, 68, 68, 0.7);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 45px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Top Badge */
+    .mascot-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .badge-correct {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.35), rgba(16, 185, 129, 0.2));
+      border: 1.5px solid #22c55e;
+      color: #4ade80;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+    }
+    .badge-wrong {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(220, 38, 38, 0.2));
+      border: 1.5px solid #ef4444;
+      color: #fca5a5;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Body Row: Avatar + Speech Card */
+    .mascot-body-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    @media (max-width: 600px) {
+      .mascot-body-row {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+    .mascot-avatar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .mascot-aura {
+      position: absolute;
+      top: 6px;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      transition: all 0.3s ease;
+    }
+    .aura-correct {
+      animation: aura-pulse-green 2s infinite alternate;
+    }
+    .aura-wrong {
+      animation: aura-pulse-red 2s infinite alternate;
+    }
+    @keyframes aura-pulse-green {
+      0% { box-shadow: 0 0 25px rgba(34, 197, 94, 0.4), inset 0 0 20px rgba(34, 197, 94, 0.3); }
+      100% { box-shadow: 0 0 50px rgba(34, 197, 94, 0.8), inset 0 0 35px rgba(34, 197, 94, 0.5); }
+    }
+    @keyframes aura-pulse-red {
+      0% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.3); }
+      100% { box-shadow: 0 0 50px rgba(239, 68, 68, 0.8), inset 0 0 35px rgba(239, 68, 68, 0.5); }
+    }
+    .mascot-img {
+      width: 124px;
+      height: 124px;
+      object-fit: contain;
+      border-radius: 24px;
+      position: relative;
+      z-index: 1;
+      animation: mascot-float 3.2s ease-in-out infinite;
+      filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.6));
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
+      padding: 4px;
+    }
+    @keyframes mascot-float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(-1.5deg); }
+    }
+    .mascot-name-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    /* Speech Bubble */
+    .mascot-speech-bubble {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(56, 189, 248, 0.35);
+      border-radius: 18px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .mascot-speech-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .mascot-speech-text {
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    .mascot-bonus-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      background: rgba(234, 179, 8, 0.15);
+      border: 1px solid rgba(234, 179, 8, 0.4);
+      color: #fde047;
+      width: fit-content;
+    }
+
+    /* Footer & Auto-advance Bar */
+    .mascot-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .mascot-countdown-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .mascot-countdown-label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+    .mascot-countdown-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .mascot-countdown-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+      border-radius: 999px;
+      transition: width 0.05s linear;
+    }
+    .mascot-action-btn {
+      padding: 9px 22px;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: #ffffff;
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .mascot-action-btn:hover {
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.7);
+      transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D WEBGL CANVAS -->
+  <div id="canvas-container"></div>
+
+  <!-- HUD OVERLAY -->
+  <div class="hud-overlay">
+    <!-- TOP HEADER BAR -->
+    <header class="top-bar interactive">
+      <div class="brand-section">
+        <div class="brand-icon">🌍</div>
+        <div>
+          <div class="brand-title">Field Lab Command</div>
+          <div class="brand-sub">UNIT 06 // EARTH PHYSICS BATTLE</div>
+        </div>
+      </div>
+
+      <!-- 5-TOPIC NAVIGATION STEPPER -->
+      <nav class="topic-stepper" id="topic-stepper">
+        <button class="topic-step-btn active" data-topic="0"><span class="topic-num">1</span> Sound Waves</button>
+        <button class="topic-step-btn" data-topic="1"><span class="topic-num">2</span> Reflections</button>
+        <button class="topic-step-btn" data-topic="2"><span class="topic-num">3</span> Earth Structures</button>
+        <button class="topic-step-btn" data-topic="3"><span class="topic-num">4</span> Earth Changes</button>
+        <button class="topic-step-btn" data-topic="4"><span class="topic-num">5</span> Eclipses</button>
+      </nav>
+
+      <!-- AUDIO CONTROLS & ROUND TIMER -->
+      <div class="top-right-tools">
+        <div class="music-pill">
+          <button class="music-btn" id="music-toggle-btn" title="Toggle Background Music">🎵</button>
+          <div class="music-bars paused" id="music-visual-bars">
+            <span class="music-bar"></span>
+            <span class="music-bar"></span>
+            <span class="music-bar"></span>
+            <span class="music-bar"></span>
+          </div>
+          <input type="range" class="volume-slider" id="music-volume" min="0" max="1" step="0.05" value="0.45" title="Volume">
+        </div>
+        <div class="timer-pill" id="timer-display">
+          <span>⏱️</span>
+          <span id="timer-seconds">60s</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN INTERACTIVE ARENA: QUESTION CONSOLES ON LEFT & RIGHT BELOW TEAM NAMES -->
+    <main class="arena-grid">
+      <!-- LEFT COLUMN: TEAM A (WAVE RIDERS) -->
+      <section class="team-column interactive">
+        <!-- Team A Name Header -->
+        <div class="team-header-card team-left" id="team-a-header">
+          <div class="team-info-group">
+            <div class="team-badge-circle badge-orange">WR</div>
+            <div class="team-names">
+              <small>FIELD TEAM A</small>
+              <h3>WAVE RIDERS</h3>
+            </div>
+          </div>
+          <div class="team-score-block">
+            <div class="team-score-num score-orange" id="team-a-score">0</div>
+            <div class="team-streak-tag" id="team-a-streak"><span>⚡</span> 0x Streak</div>
+          </div>
+        </div>
+
+        <!-- Team A Question & Answer Console (Directly Below Team A Name) -->
+        <div class="question-console-card" id="team-a-console">
+          <div>
+            <div class="console-header-badge">
+              <span class="topic-tag tag-orange" id="team-a-topic-tag">6.1 SOUND WAVES</span>
+              <span class="q-number-pill" id="team-a-qnum">QUESTION 1 / 3</span>
+            </div>
+            <h4 class="question-title" id="team-a-question-text">How does a sound wave travel through air?</h4>
+            <p class="question-clue" id="team-a-clue-text">Watch the air molecules compress and spread as the source vibrates.</p>
+
+            <div class="answer-options-list" id="team-a-options">
+              <button class="opt-btn" disabled><span class="opt-letter">A</span><span>Particles vibrate parallel to the wave direction (Longitudinal)</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">B</span><span>Particles move in circular loops like ocean surface waves</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">C</span><span>Particles travel bodily from the speaker to the listener's ear</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">D</span><span>Air molecules stay completely frozen in place</span></button>
+            </div>
+          </div>
+
+          <div class="console-action-bar">
+            <button class="buzz-btn buzz-orange" id="team-a-buzz-btn">
+              <span>⚡</span> BUZZ IN (KEY A)
+            </button>
+            <button class="lock-btn" id="team-a-lock-btn" disabled>
+              🔒 Lock Answer
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER COLUMN: UNRESTRICTED 3D VIEWPORT WITH SIMULATION CONTROLS DOCK -->
+      <div class="center-column interactive">
+        <div class="sim-controls-dock" id="sim-dock">
+          <span class="sim-dock-title">🔊 Sound Lab</span>
+          <div class="sim-control-item">
+            <span>Freq: <b id="lbl-freq">440Hz</b></span>
+            <input type="range" id="slider-freq" min="200" max="900" step="10" value="440">
+          </div>
+          <div class="sim-control-item">
+            <span>Amp:</span>
+            <input type="range" id="slider-amp" min="0.05" max="0.5" step="0.05" value="0.25">
+          </div>
+          <button class="sim-action-btn" id="btn-tone">🔈 Tone: OFF</button>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: TEAM B (ECHO TEAM) -->
+      <section class="team-column interactive">
+        <!-- Team B Name Header -->
+        <div class="team-header-card team-right" id="team-b-header">
+          <div class="team-info-group">
+            <div class="team-badge-circle badge-teal">ET</div>
+            <div class="team-names">
+              <small>FIELD TEAM B</small>
+              <h3>ECHO TEAM</h3>
+            </div>
+          </div>
+          <div class="team-score-block">
+            <div class="team-score-num score-teal" id="team-b-score">0</div>
+            <div class="team-streak-tag" id="team-b-streak"><span>⚡</span> 0x Streak</div>
+          </div>
+        </div>
+
+        <!-- Team B Question & Answer Console (Directly Below Team B Name) -->
+        <div class="question-console-card" id="team-b-console">
+          <div>
+            <div class="console-header-badge">
+              <span class="topic-tag tag-teal" id="team-b-topic-tag">6.1 SOUND WAVES</span>
+              <span class="q-number-pill" id="team-b-qnum">QUESTION 1 / 3</span>
+            </div>
+            <h4 class="question-title" id="team-b-question-text">How does a sound wave travel through air?</h4>
+            <p class="question-clue" id="team-b-clue-text">Watch the air molecules compress and spread as the source vibrates.</p>
+
+            <div class="answer-options-list" id="team-b-options">
+              <button class="opt-btn" disabled><span class="opt-letter">A</span><span>Particles vibrate parallel to the wave direction (Longitudinal)</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">B</span><span>Particles move in circular loops like ocean surface waves</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">C</span><span>Particles travel bodily from the speaker to the listener's ear</span></button>
+              <button class="opt-btn" disabled><span class="opt-letter">D</span><span>Air molecules stay completely frozen in place</span></button>
+            </div>
+          </div>
+
+          <div class="console-action-bar">
+            <button class="buzz-btn buzz-teal" id="team-b-buzz-btn">
+              <span>⚡</span> BUZZ IN (KEY L)
+            </button>
+            <button class="lock-btn" id="team-b-lock-btn" disabled>
+              🔒 Lock Answer
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- BOTTOM BROADCAST BAR -->
+    <footer class="bottom-bar interactive">
+      <div class="broadcast-msg">
+        <span class="live-pulse"></span>
+        <span id="announcer-text">Welcome Scientists! Hit your team buzzer (Wave Riders: Key A / Echo Team: Key L) to take the question!</span>
+      </div>
+      <div class="bottom-actions">
+        <button class="secondary-btn" id="restart-round-btn">🔄 Reset Round</button>
+        <button class="next-topic-btn" id="next-stage-btn">Next Topic ➔</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- MASCOT RIGHT / WRONG ANSWER FEEDBACK MODAL -->
+  <div class="mascot-modal-backdrop" id="mascot-modal">
+    <div class="mascot-modal-card correct-mode" id="mascot-card">
+      <div class="mascot-badge badge-correct" id="mascot-badge">🌟 CORRECT ANSWER! (+30 PTS)</div>
+
+      <div class="mascot-body-row">
+        <div class="mascot-avatar-col">
+          <div class="mascot-aura aura-correct" id="mascot-aura"></div>
+          <img src="./mascot.png" class="mascot-img" id="mascot-avatar-img" alt="Terra Mascot">
+          <div class="mascot-name-tag">🌍 Terra Guardian</div>
+        </div>
+
+        <div class="mascot-speech-bubble" id="mascot-bubble">
+          <h3 class="mascot-speech-title" id="mascot-speech-title">Wave Riders scored spot-on!</h3>
+          <p class="mascot-speech-text" id="mascot-speech-text">Particles vibrate parallel to the wave direction in longitudinal sound waves.</p>
+          <div class="mascot-bonus-pill" id="mascot-bonus-pill">⚡ 2x Streak Multiplier Active (+60 Pts Total)</div>
+        </div>
+      </div>
+
+      <div class="mascot-footer">
+        <div class="mascot-countdown-wrap">
+          <span class="mascot-countdown-label" id="mascot-countdown-label">Auto-proceeding in 4s...</span>
+          <div class="mascot-countdown-track">
+            <div class="mascot-countdown-bar" id="mascot-countdown-bar"></div>
+          </div>
+        </div>
+        <button class="mascot-action-btn" id="mascot-action-btn">Next Challenge ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAND CHAMPIONSHIP CELEBRATION MODAL -->
+  <div class="victory-modal-backdrop" id="victory-modal">
+    <div class="victory-card">
+      <div class="trophy-glow">🏆</div>
+      <h2 id="victory-headline">CHAMPIONS OF EARTH PHYSICS</h2>
+      <p id="victory-sub">Outstanding scientific mastery across all 5 Earth Physics simulations!</p>
+      <div class="final-score-row">
+        <div class="final-team-box">
+          <h4 style="color: var(--orange)">Wave Riders</h4>
+          <span class="score-orange" id="final-score-a">0</span>
+        </div>
+        <div class="final-team-box">
+          <h4 style="color: var(--teal)">Echo Team</h4>
+          <span class="score-teal" id="final-score-b">0</span>
+        </div>
+      </div>
+      <div class="victory-buttons">
+        <button class="rematch-btn" id="rematch-btn">🔄 Play Rematch</button>
+        <button class="secondary-btn" id="close-victory-btn">Free Orbit Simulation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO ELEMENTS -->
+  <audio id="bg-audio" loop preload="auto">
+    <source src="./bg-music.mp3" type="audio/mpeg">
+    <source src="./public/bg-music.mp3" type="audio/mpeg">
+    <source src="../pixeltown-color-parade-main-version-41716-01-53.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- VENDOR MODULES -->
+  <script src="./vendor/three-bundle.js"></script>
+  <script src="./vendor/confetti.browser.js"></script>
+
+  <!-- APPLICATION LOGIC & THREE.JS ENGINE -->
+  <script>
+    const THREE = window.THREE;
+    const OrbitControls = window.OrbitControls;
+
+    /* ==========================================================
+       1. TOPICS & COMPREHENSIVE CURRICULUM QUESTIONS
+       ========================================================== */
+    const TOPICS_DATA = [
+      {
+        id: 0,
+        code: "6.1",
+        title: "Sound Waves",
+        short: "Sound Waves",
+        tag: "Longitudinal Wave Physics",
+        questions: [
+          {
+            q: "How does a sound wave travel through air?",
+            clue: "Watch the air molecules compress and spread as the source vibrates back and forth.",
+            options: [
+              "Particles vibrate parallel to the wave direction (Longitudinal)",
+              "Particles move in circular loops like ocean surface waves",
+              "Particles travel bodily from the speaker to the listener's ear",
+              "Air molecules stay completely frozen in place"
+            ],
+            correct: 0,
+            points: 25
+          },
+          {
+            q: "Why can sound NOT travel through the vacuum of outer space?",
+            clue: "Mechanical waves require particles to collide and pass energy forward.",
+            options: [
+              "Space is too cold for sound energy to exist",
+              "Sound requires a physical material medium of particles to propagate",
+              "Solar radiation neutralizes sound vibrations immediately",
+              "Zero gravity pulls sound waves apart"
+            ],
+            correct: 1,
+            points: 30
+          },
+          {
+            q: "In which of the following media does sound travel fastest?",
+            clue: "Tightly bound molecules transfer vibrational impulses with greatest speed.",
+            options: [
+              "Solids (e.g. Granite / Steel)",
+              "Liquids (e.g. Ocean Water)",
+              "Gases (e.g. Room Air)",
+              "A complete vacuum"
+            ],
+            correct: 0,
+            points: 35
+          }
+        ]
+      },
+      {
+        id: 1,
+        code: "6.2",
+        title: "Reflections of Sound",
+        short: "Reflections",
+        tag: "Echo Chamber & Sonar",
+        questions: [
+          {
+            q: "Which surface produces the clearest and strongest echo?",
+            clue: "Rigid, non-porous surfaces bounce acoustic wavefronts with minimal dissipation.",
+            options: [
+              "Heavy velvet theater drapery",
+              "Porous open-cell acoustic foam",
+              "A smooth, flat, rigid concrete wall",
+              "A mound of loose fiberglass wool"
+            ],
+            correct: 2,
+            points: 25
+          },
+          {
+            q: "A ship sends a sonar pulse to the seabed. In seawater (v = 1500 m/s), the echo returns in 2.0s. What is the depth?",
+            clue: "Sound travels down and reflects back up (round trip): d = (v × t) / 2.",
+            options: [
+              "3000 meters",
+              "1500 meters",
+              "750 meters",
+              "6000 meters"
+            ],
+            correct: 1,
+            points: 35
+          },
+          {
+            q: "What fundamental rule governs sound wave reflection off a flat barrier?",
+            clue: "Sound reflections follow identical geometric angle laws as light on a mirror.",
+            options: [
+              "Angle of Incidence = Angle of Reflection (i = r)",
+              "Sound only reflects perpendicular at a 90° angle",
+              "The reflected angle is always half the incident angle",
+              "Reflected waves change frequency completely"
+            ],
+            correct: 0,
+            points: 30
+          }
+        ]
+      },
+      {
+        id: 2,
+        code: "6.3",
+        title: "Structures of the Earth",
+        short: "Earth Structures",
+        tag: "Seismic Layers & Dynamo",
+        questions: [
+          {
+            q: "Which layer of the Earth is liquid and generates our protective magnetic field?",
+            clue: "Vigorous convection of molten iron-nickel fluid creates electrical dynamo currents.",
+            options: [
+              "Crust",
+              "Mantle",
+              "Outer Core",
+              "Inner Core"
+            ],
+            correct: 2,
+            points: 30
+          },
+          {
+            q: "Why is the Earth's Inner Core solid despite scorching temperatures exceeding 5,000°C?",
+            clue: "Immense confining gravitational pressure forces iron atoms into a solid crystal lattice.",
+            options: [
+              "It is composed of sub-zero cryogenic ice",
+              "Extreme planetary pressure raises the melting point above the core temperature",
+              "It has cooled down completely over billions of years",
+              "It is insulated by an impenetrable vacuum layer"
+            ],
+            correct: 1,
+            points: 35
+          },
+          {
+            q: "How do geophysicists prove that Earth's outer core is in a liquid state?",
+            clue: "Shear waves (S-waves) cannot shear fluids and are blocked, creating a global shadow zone.",
+            options: [
+              "Deep boreholes have reached the center of the Earth",
+              "S-waves cannot pass through liquids, creating an S-wave shadow zone",
+              "Volcanic magma comes straight from the core",
+              "Gravitational satellites detect hollow regions"
+            ],
+            correct: 1,
+            points: 40
+          }
+        ]
+      },
+      {
+        id: 3,
+        code: "6.4",
+        title: "Changes in the Earth",
+        short: "Earth Changes",
+        tag: "Plate Tectonics & Volcanism",
+        questions: [
+          {
+            q: "What geological feature rises when two continental tectonic plates push together at a convergent boundary?",
+            clue: "Continental crust is too buoyant to subduct; it crumples and folds upward.",
+            options: [
+              "Massive folded mountain ranges (e.g. Himalayas)",
+              "Mid-ocean rift valleys with seafloor spreading",
+              "Abyssal ocean plains with zero elevation",
+              "Plates evaporate directly into the atmosphere"
+            ],
+            correct: 0,
+            points: 30
+          },
+          {
+            q: "What geological process occurs at divergent plate boundaries like the Mid-Atlantic Ridge?",
+            clue: "Tensional pulling allows mantle magma to rise and form fresh oceanic crust.",
+            options: [
+              "Plates separate and upwelling magma forms new oceanic crust",
+              "Continents subduct completely into deep ocean trenches",
+              "Plates lock together permanently without motion",
+              "Earth's diameter expands rapidly every year"
+            ],
+            correct: 0,
+            points: 35
+          },
+          {
+            q: "What sudden hazard is generated along transform boundaries (like the San Andreas Fault)?",
+            clue: "Horizontal grinding locks rock with friction until elastic strain snaps catastrophically.",
+            options: [
+              "Earthquakes caused by sudden release of locked frictional elastic strain",
+              "Formation of new island arcs and deep trenches",
+              "Quiet basaltic lava fountain plateaus",
+              "Instant evaporation of the continental shelf"
+            ],
+            correct: 0,
+            points: 35
+          }
+        ]
+      },
+      {
+        id: 4,
+        code: "6.5",
+        title: "Solar & Lunar Eclipses",
+        short: "Eclipses",
+        tag: "Celestial Shadow Cones",
+        questions: [
+          {
+            q: "Which precise celestial alignment produces a Solar Eclipse on Earth?",
+            clue: "The Moon passes directly between the Sun and Earth, casting its shadow on Earth.",
+            options: [
+              "Sun — Earth — Moon",
+              "Sun — Moon — Earth",
+              "Earth — Sun — Moon",
+              "Moon — Earth — Sun"
+            ],
+            correct: 1,
+            points: 35
+          },
+          {
+            q: "Why does the Moon appear copper / blood-red during a Total Lunar Eclipse?",
+            clue: "Sunlight is filtered and bent by Earth's atmosphere, projecting red sunsets into the shadow cone.",
+            options: [
+              "The Moon's volcanic rock glows when cold",
+              "Earth's atmosphere scatters blue light but refracts red light into the umbra (Rayleigh scattering)",
+              "The Moon catches solar flares during totality",
+              "City lights from Earth illuminate the lunar surface"
+            ],
+            correct: 1,
+            points: 40
+          },
+          {
+            q: "What is the completely dark, inner region of a shadow cone called?",
+            clue: "The inner total shadow is distinct from the lighter outer penumbra.",
+            options: [
+              "Penumbra",
+              "Umbra",
+              "Antumbra",
+              "Corona"
+            ],
+            correct: 1,
+            points: 30
+          }
+        ]
+      }
+    ];
+
+    /* ==========================================================
+       2. SYNTHESIZED SOUND EFFECTS ENGINE (Zero Latency)
+       ========================================================== */
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.synthOsc = null;
+        this.synthGain = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      buzz() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.22);
+      }
+      correct() {
+        this.init();
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.08);
+          gain.gain.setValueAtTime(0.25, now + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.38);
+        });
+      }
+      wrong() {
+        this.init();
+        const now = this.ctx.currentTime;
+        [220, 207.65, 196].forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + i * 0.1);
+          gain.gain.setValueAtTime(0.3, now + i * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.1);
+          osc.stop(now + i * 0.1 + 0.28);
+        });
+      }
+      ping() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.85);
+      }
+      tick() {
+        this.init();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.06);
+      }
+      startTone(freq) {
+        this.init();
+        if (this.synthOsc) return;
+        this.synthOsc = this.ctx.createOscillator();
+        this.synthGain = this.ctx.createGain();
+        this.synthOsc.type = 'sine';
+        this.synthOsc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        this.synthGain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        this.synthOsc.connect(this.synthGain);
+        this.synthGain.connect(this.ctx.destination);
+        this.synthOsc.start();
+      }
+      setToneFreq(freq) {
+        if (this.synthOsc && this.ctx) {
+          this.synthOsc.frequency.setTargetAtTime(freq, this.ctx.currentTime, 0.05);
+        }
+      }
+      stopTone() {
+        if (this.synthOsc && this.synthGain) {
+          this.synthGain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.08);
+          setTimeout(() => {
+            if (this.synthOsc) {
+              this.synthOsc.stop();
+              this.synthOsc.disconnect();
+              this.synthOsc = null;
+            }
+          }, 100);
+        }
+      }
+    }
+    const sfx = new SoundEngine();
+
+    /* ==========================================================
+       3. BACKGROUND MUSIC CONTROLLER
+       ========================================================== */
+    const bgAudio = document.getElementById('bg-audio');
+    const musicToggleBtn = document.getElementById('music-toggle-btn');
+    const musicVisualBars = document.getElementById('music-visual-bars');
+    const musicVolume = document.getElementById('music-volume');
+    let isMusicPlaying = false;
+
+    bgAudio.volume = parseFloat(musicVolume.value);
+
+    function toggleMusic() {
+      sfx.init();
+      if (isMusicPlaying) {
+        bgAudio.pause();
+        isMusicPlaying = false;
+        musicVisualBars.classList.add('paused');
+        musicToggleBtn.textContent = '🔇';
+      } else {
+        bgAudio.play().then(() => {
+          isMusicPlaying = true;
+          musicVisualBars.classList.remove('paused');
+          musicToggleBtn.textContent = '🎵';
+        }).catch(err => {
+          console.warn("Autoplay audio blocked, click again to play:", err);
+        });
+      }
+    }
+    musicToggleBtn.addEventListener('click', toggleMusic);
+    musicVolume.addEventListener('input', (e) => {
+      bgAudio.volume = parseFloat(e.target.value);
+    });
+
+    // Start audio on first user interaction anywhere
+    window.addEventListener('click', () => {
+      sfx.init();
+      if (!isMusicPlaying && bgAudio.paused) {
+        bgAudio.play().then(() => {
+          isMusicPlaying = true;
+          musicVisualBars.classList.remove('paused');
+          musicToggleBtn.textContent = '🎵';
+        }).catch(() => {});
+      }
+    }, { once: true });
+
+    /* ==========================================================
+       4. GAME STATE & TWO-TEAM BUZZER BATTLE ENGINE
+       ========================================================== */
+    const gameState = {
+      currentTopicIndex: 0,
+      currentQuestionIndex: 0,
+      scores: { a: 0, b: 0 },
+      streaks: { a: 0, b: 0 },
+      activeTurn: null, // 'a' | 'b' | null
+      team1Attempted: false,
+      team2Attempted: false,
+      selectedOptions: { a: null, b: null },
+      lockedOptions: { a: false, b: false },
+      answerRevealed: false,
+      timeLeft: 60,
+      timerInterval: null
+    };
+
+    /* ==========================================================
+       5. THREE.JS 3D SCENE & TOPIC SIMULATIONS
+       ========================================================== */
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x07131e);
+    scene.fog = new THREE.FogExp2(0x07131e, 0.025);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 7.5, 17);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 6;
+    controls.maxDistance = 35;
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.target.set(0, 1.8, 0);
+
+    // Global Arena Environment: Sci-Fi Lab Dais & Starlight
+    const ambientLight = new THREE.AmbientLight(0xd8ecdf, 1.2);
+    scene.add(ambientLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff6dc, 2.8);
+    dirLight.position.set(-8, 16, 12);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Starfield particles
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 800;
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) {
+      starPos[i] = (Math.random() - 0.5) * 120;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.45, transparent: true, opacity: 0.8 });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // Base Floating Lab Platform
+    const labPlatformGroup = new THREE.Group();
+    const daisGeo = new THREE.CylinderGeometry(8.5, 9.2, 0.6, 64);
+    const daisMat = new THREE.MeshStandardMaterial({ color: 0x102535, roughness: 0.5, metalness: 0.4 });
+    const daisMesh = new THREE.Mesh(daisGeo, daisMat);
+    daisMesh.position.y = -0.3;
+    daisMesh.receiveShadow = true;
+    labPlatformGroup.add(daisMesh);
+
+    const ringGeo = new THREE.RingGeometry(8.1, 8.35, 64);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, side: THREE.DoubleSide });
+    const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+    ringMesh.rotation.x = -Math.PI / 2;
+    ringMesh.position.y = 0.01;
+    labPlatformGroup.add(ringMesh);
+
+    scene.add(labPlatformGroup);
+
+    // Group holding the active topic 3D models
+    const activeSimulationGroup = new THREE.Group();
+    scene.add(activeSimulationGroup);
+
+    /* ==========================================================
+       6. 3D TOPIC SIMULATIONS IMPLEMENTATION
+       ========================================================== */
+    let topicUpdaters = [];
+
+    // --- TOPIC 1: SOUND WAVES SIMULATION ---
+    function buildSoundWavesSim() {
+      const g = new THREE.Group();
+      g.position.set(0, 1.8, 0);
+
+      // Acoustic Speaker Model (Left)
+      const speakerGroup = new THREE.Group();
+      speakerGroup.position.set(-4.5, 0, 0);
+
+      const boxGeo = new THREE.BoxGeometry(1.6, 2.8, 1.8);
+      const boxMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.2 });
+      speakerGroup.add(new THREE.Mesh(boxGeo, boxMat));
+
+      const coneGeo = new THREE.CylinderGeometry(0.7, 0.2, 0.4, 32);
+      const coneMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.3, emissive: 0xc2410c, emissiveIntensity: 0.4 });
+      const coneMesh = new THREE.Mesh(coneGeo, coneMat);
+      coneMesh.rotation.z = -Math.PI / 2;
+      coneMesh.position.x = 0.85;
+      speakerGroup.add(coneMesh);
+
+      const capGeo = new THREE.SphereGeometry(0.28, 16, 16);
+      const capMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xeab308, emissiveIntensity: 0.6 });
+      const capMesh = new THREE.Mesh(capGeo, capMat);
+      capMesh.position.x = 1.0;
+      speakerGroup.add(capMesh);
+
+      g.add(speakerGroup);
+
+      // Air Molecule Grid: 24 columns × 6 rows × 4 depth
+      const cols = 24;
+      const rows = 6;
+      const depth = 4;
+      const molCount = cols * rows * depth;
+      const molGeo = new THREE.SphereGeometry(0.08, 12, 12);
+      const molMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, emissive: 0x0284c7, emissiveIntensity: 0.3 });
+      const instancedMols = new THREE.InstancedMesh(molGeo, molMat, molCount);
+      instancedMols.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+      const dummy = new THREE.Object3D();
+      const basePositions = [];
+
+      let idx = 0;
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          for (let d = 0; d < depth; d++) {
+            const x = -3.2 + c * 0.32;
+            const y = (r - rows / 2 + 0.5) * 0.38;
+            const z = (d - depth / 2 + 0.5) * 0.38;
+            basePositions.push({ x, y, z, c });
+            dummy.position.set(x, y, z);
+            dummy.updateMatrix();
+            instancedMols.setMatrixAt(idx++, dummy.matrix);
+          }
+        }
+      }
+      instancedMols.instanceMatrix.needsUpdate = true;
+      g.add(instancedMols);
+
+      // Expanding Wavefront Rings
+      const rings = [];
+      for (let i = 0; i < 4; i++) {
+        const rGeo = new THREE.RingGeometry(0.3, 0.38, 32);
+        const rMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.6, side: THREE.DoubleSide });
+        const rMesh = new THREE.Mesh(rGeo, rMat);
+        rMesh.rotation.y = Math.PI / 2;
+        rMesh.position.set(-3.2 + i * 1.8, 0, 0);
+        g.add(rMesh);
+        rings.push({ mesh: rMesh, offset: i * 1.8 });
+      }
+
+      // Human Ear / Receptor (Right)
+      const earGroup = new THREE.Group();
+      earGroup.position.set(5.0, 0, 0);
+      const earBase = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.2, 1.2), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 }));
+      earGroup.add(earBase);
+      const drumGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.1, 24);
+      const drumMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x16a34a, emissiveIntensity: 0.5 });
+      const drumMesh = new THREE.Mesh(drumGeo, drumMat);
+      drumMesh.rotation.z = Math.PI / 2;
+      drumMesh.position.x = -0.22;
+      earGroup.add(drumMesh);
+      g.add(earGroup);
+
+      // Simulation Param State
+      const params = {
+        freq: 440,
+        amp: 0.25,
+        playAudio: false
+      };
+
+      // Updater loop
+      topicUpdaters.push((delta, time) => {
+        // Speaker vibration
+        const coneOffset = Math.sin(time * (params.freq * 0.05)) * params.amp;
+        coneMesh.position.x = 0.85 + coneOffset;
+        capMesh.position.x = 1.0 + coneOffset;
+
+        // Eardrum vibration response
+        drumMesh.position.x = -0.22 + Math.sin(time * (params.freq * 0.05) - 3.0) * (params.amp * 0.8);
+
+        // Displace particles longitudinally (X axis)
+        let molIdx = 0;
+        for (let i = 0; i < molCount; i++) {
+          const bp = basePositions[i];
+          const phase = (bp.x * 2.2) - (time * (params.freq * 0.04));
+          const disp = Math.sin(phase) * (params.amp * 0.28);
+          dummy.position.set(bp.x + disp, bp.y, bp.z);
+          dummy.updateMatrix();
+          instancedMols.setMatrixAt(molIdx++, dummy.matrix);
+        }
+        instancedMols.instanceMatrix.needsUpdate = true;
+
+        // Wavefront rings progression
+        rings.forEach(r => {
+          let nx = ((r.mesh.position.x + delta * 3.5 + 3.2) % 7.8) - 3.2;
+          r.mesh.position.x = nx;
+          const prog = (nx + 3.2) / 7.8;
+          r.mesh.scale.setScalar(1 + prog * 1.8);
+          r.mesh.material.opacity = Math.max(0, 0.7 - prog * 0.7);
+        });
+      });
+
+      // Render Dock Controls
+      const dock = document.getElementById('sim-dock');
+      dock.innerHTML = `
+        <span class="sim-dock-title">🔊 Sound Lab</span>
+        <div class="sim-control-item">
+          <span>Freq: <b id="lbl-freq">${params.freq}Hz</b></span>
+          <input type="range" id="slider-freq" min="200" max="900" step="10" value="${params.freq}">
+        </div>
+        <div class="sim-control-item">
+          <span>Amp:</span>
+          <input type="range" id="slider-amp" min="0.05" max="0.5" step="0.05" value="${params.amp}">
+        </div>
+        <button class="sim-action-btn" id="btn-tone">🔈 Tone: OFF</button>
+      `;
+
+      document.getElementById('slider-freq').addEventListener('input', (e) => {
+        params.freq = parseFloat(e.target.value);
+        document.getElementById('lbl-freq').textContent = params.freq + 'Hz';
+        sfx.setToneFreq(params.freq);
+      });
+      document.getElementById('slider-amp').addEventListener('input', (e) => {
+        params.amp = parseFloat(e.target.value);
+      });
+      const toneBtn = document.getElementById('btn-tone');
+      toneBtn.addEventListener('click', () => {
+        params.playAudio = !params.playAudio;
+        if (params.playAudio) {
+          sfx.startTone(params.freq);
+          toneBtn.textContent = '🔊 Tone: ON';
+          toneBtn.style.background = 'rgba(34, 197, 94, 0.4)';
+        } else {
+          sfx.stopTone();
+          toneBtn.textContent = '🔈 Tone: OFF';
+          toneBtn.style.background = '';
+        }
+      });
+
+      return g;
+    }
+
+    // --- TOPIC 2: REFLECTIONS OF SOUND SIMULATION ---
+    function buildReflectionsSim() {
+      const g = new THREE.Group();
+      g.position.set(0, 1.8, 0);
+
+      const params = {
+        surface: "concrete", // "concrete" | "foam"
+        wallX: 3.8,
+        pingActive: false,
+        pingTimer: 0
+      };
+
+      // Sound Transmitter / Sonar Source & Detector Console (Left at -4.5)
+      const emitterGroup = new THREE.Group();
+      emitterGroup.position.set(-4.5, 0, 0);
+
+      // Transceiver stand & dish
+      const standGeo = new THREE.CylinderGeometry(0.35, 0.45, 1.4, 24);
+      const standMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.3 });
+      const standMesh = new THREE.Mesh(standGeo, standMat);
+      standMesh.position.y = -0.7;
+      emitterGroup.add(standMesh);
+
+      const dishGeo = new THREE.CylinderGeometry(0.8, 0.25, 0.5, 32);
+      const dishMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.3, metalness: 0.5 });
+      const dishMesh = new THREE.Mesh(dishGeo, dishMat);
+      dishMesh.rotation.z = -Math.PI / 2;
+      dishMesh.position.x = 0.25;
+      emitterGroup.add(dishMesh);
+
+      // Sound Emitter Core (Bright Orange)
+      const emitterCore = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 32, 16),
+        new THREE.MeshStandardMaterial({ color: 0xf97316, emissive: 0xc2410c, emissiveIntensity: 0.7 })
+      );
+      emitterCore.position.x = 0.38;
+      emitterGroup.add(emitterCore);
+
+      // Echo Detector Reception Ring (Green glow when echo returns!)
+      const detectorRingGeo = new THREE.RingGeometry(0.85, 1.05, 36);
+      const detectorRingMat = new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.2, side: THREE.DoubleSide });
+      const detectorRing = new THREE.Mesh(detectorRingGeo, detectorRingMat);
+      detectorRing.rotation.y = Math.PI / 2;
+      detectorRing.position.x = 0.45;
+      emitterGroup.add(detectorRing);
+
+      // Status indicator LED
+      const ledGeo = new THREE.SphereGeometry(0.12, 16, 16);
+      const ledMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x16a34a, emissiveIntensity: 0.3 });
+      const ledMesh = new THREE.Mesh(ledGeo, ledMat);
+      ledMesh.position.set(0.1, 0.85, 0);
+      emitterGroup.add(ledMesh);
+
+      g.add(emitterGroup);
+
+      // Reflector Wall Group (Right, adjustable X position)
+      const wallGroup = new THREE.Group();
+      wallGroup.position.set(params.wallX, 0, 0);
+
+      // Main barrier slab
+      const wallGeo = new THREE.BoxGeometry(0.5, 4.4, 5.2);
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.18, metalness: 0.45 });
+      const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+      wallGroup.add(wallMesh);
+
+      // Wall base stand
+      const wallBase = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.4, 5.4), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 }));
+      wallBase.position.y = -2.25;
+      wallGroup.add(wallBase);
+
+      // Front Surface Impact Flash Layer
+      const impactGeo = new THREE.PlaneGeometry(5.1, 4.3);
+      const impactMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide });
+      const impactMesh = new THREE.Mesh(impactGeo, impactMat);
+      impactMesh.rotation.y = -Math.PI / 2;
+      impactMesh.position.x = -0.26;
+      wallGroup.add(impactMesh);
+
+      g.add(wallGroup);
+
+      // Optical/Acoustic Ray Guidelines (i = r)
+      const rayGeoIncident = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-4.0, 0, 0),
+        new THREE.Vector3(params.wallX - 0.25, 1.2, 0)
+      ]);
+      const rayLineIncident = new THREE.Line(rayGeoIncident, new THREE.LineBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.45 }));
+      g.add(rayLineIncident);
+
+      const rayGeoReflected = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(params.wallX - 0.25, 1.2, 0),
+        new THREE.Vector3(-4.0, 2.4, 0)
+      ]);
+      const rayLineReflected = new THREE.Line(rayGeoReflected, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 }));
+      g.add(rayLineReflected);
+
+      // 4 Outgoing Incident Wavefront Arcs (Traveling Left -> Right)
+      const incidentCount = 4;
+      const incidentMeshes = [];
+      for (let i = 0; i < incidentCount; i++) {
+        const ringGeo = new THREE.TorusGeometry(0.75, 0.045, 12, 48);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.75 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.y = Math.PI / 2;
+        ring.position.set(-4.0, 0, 0);
+        g.add(ring);
+        incidentMeshes.push(ring);
+      }
+
+      // 4 Returning Reflected Wavefront Arcs (Bouncing Right -> Left!)
+      const reflectedCount = 4;
+      const reflectedMeshes = [];
+      for (let i = 0; i < reflectedCount; i++) {
+        const ringGeo = new THREE.TorusGeometry(0.85, 0.05, 12, 48);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.8 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.y = Math.PI / 2;
+        ring.position.set(params.wallX - 0.25, 0, 0);
+        g.add(ring);
+        reflectedMeshes.push(ring);
+      }
+
+      // Single High-Visibility Ping Pulse Object
+      const pingPulse = new THREE.Mesh(
+        new THREE.SphereGeometry(0.32, 24, 16),
+        new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfacc15, emissiveIntensity: 1.2 })
+      );
+      pingPulse.visible = false;
+      g.add(pingPulse);
+
+      const pingHalo = new THREE.Mesh(
+        new THREE.RingGeometry(0.4, 0.55, 32),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.9, side: THREE.DoubleSide })
+      );
+      pingHalo.rotation.y = Math.PI / 2;
+      pingHalo.visible = false;
+      g.add(pingHalo);
+
+      // Simulation Animation Loop
+      topicUpdaters.push((delta, time) => {
+        const startX = -4.0;
+        const targetX = params.wallX - 0.25;
+        const totalSpan = targetX - startX;
+        const speed = 3.6; // Units per second
+
+        // Dynamic updates for Ray line endpoints if wall is moved
+        const posInc = rayGeoIncident.attributes.position.array;
+        posInc[3] = targetX;
+        rayGeoIncident.attributes.position.needsUpdate = true;
+
+        const posRef = rayGeoReflected.attributes.position.array;
+        posRef[0] = targetX;
+        rayGeoReflected.attributes.position.needsUpdate = true;
+
+        // 1. INCIDENT WAVEFRONTS (Outbound: -4.0 -> wall)
+        incidentMeshes.forEach((mesh, i) => {
+          const offsetTime = (time * speed + i * (totalSpan / incidentCount)) % totalSpan;
+          const currX = startX + offsetTime;
+          const prog = offsetTime / totalSpan;
+
+          mesh.position.set(currX, 0, 0);
+          mesh.scale.set(0.5 + prog * 1.5, 0.5 + prog * 1.5, 1);
+          mesh.material.opacity = Math.max(0.08, 0.85 - prog * 0.35);
+
+          // Impact trigger right near wall
+          if (prog > 0.96) {
+            impactMat.opacity = params.surface === "foam" ? 0.35 : 0.8;
+            impactMat.color.setHex(params.surface === "foam" ? 0xef4444 : 0x38bdf8);
+          }
+        });
+
+        // 2. REFLECTED WAVEFRONTS (Returning: wall -> -4.0)
+        reflectedMeshes.forEach((mesh, i) => {
+          const offsetTime = (time * speed + i * (totalSpan / reflectedCount)) % totalSpan;
+          const currX = targetX - offsetTime;
+          const prog = offsetTime / totalSpan;
+
+          mesh.position.set(currX, 0, 0);
+          mesh.scale.set(0.6 + prog * 2.0, 0.6 + prog * 2.0, 1);
+
+          if (params.surface === "foam") {
+            // Absorbed! Almost completely invisible
+            mesh.material.opacity = Math.max(0, 0.1 - prog * 0.5);
+            mesh.material.color.setHex(0x94a3b8);
+          } else {
+            // Hard wall produces brilliant reflected echo waves!
+            mesh.material.opacity = Math.max(0.12, 0.85 - prog * 0.38);
+            mesh.material.color.setHex(0x38bdf8);
+
+            // Detector glow triggered when reflected wave arrives at receiver
+            if (prog > 0.93) {
+              detectorRingMat.opacity = 0.95;
+              ledMat.emissiveIntensity = 1.4;
+            }
+          }
+        });
+
+        // Decay impact flash & detector glow smoothly
+        if (impactMat.opacity > 0.05) impactMat.opacity -= delta * 3.5;
+        if (detectorRingMat.opacity > 0.2) detectorRingMat.opacity -= delta * 2.2;
+        if (ledMat.emissiveIntensity > 0.3) ledMat.emissiveIntensity -= delta * 1.8;
+
+        // 3. SINGLE SONAR PING PULSE (If triggered)
+        if (params.pingActive) {
+          params.pingTimer += delta;
+          const roundTrip = (totalSpan * 2) / speed;
+          const halfTrip = totalSpan / speed;
+
+          if (params.pingTimer <= halfTrip) {
+            // Outbound journey
+            const p = params.pingTimer / halfTrip;
+            const px = startX + p * totalSpan;
+            pingPulse.position.set(px, 0, 0);
+            pingHalo.position.set(px, 0, 0);
+            pingHalo.scale.setScalar(0.7 + p * 1.5);
+            pingHalo.material.color.setHex(0xf97316);
+          } else if (params.pingTimer <= roundTrip) {
+            // Return rebound journey
+            const p = (params.pingTimer - halfTrip) / halfTrip;
+            const px = targetX - p * totalSpan;
+            pingPulse.position.set(px, 0, 0);
+            pingHalo.position.set(px, 0, 0);
+            pingHalo.scale.setScalar(0.9 + p * 2.0);
+
+            if (params.surface === "foam") {
+              pingPulse.visible = false;
+              pingHalo.visible = false;
+            } else {
+              pingHalo.material.color.setHex(0x38bdf8);
+            }
+          } else {
+            // Ping roundtrip completed!
+            params.pingActive = false;
+            pingPulse.visible = false;
+            pingHalo.visible = false;
+            if (params.surface === "concrete") {
+              sfx.ping();
+              detectorRingMat.opacity = 1.0;
+              ledMat.emissiveIntensity = 2.0;
+              document.getElementById('announcer-text').textContent = `🎯 Echo Received! Round-trip t = 2.0s | Speed v = 1,500 m/s | Calculated Seabed Depth = (1,500 × 2.0) / 2 = 1,500m!`;
+            } else {
+              document.getElementById('announcer-text').textContent = "❌ No echo returned: Porous acoustic foam absorbed sound energy into friction!";
+            }
+          }
+        }
+      });
+
+      // Render Dock Controls for Topic 2
+      const dock = document.getElementById('sim-dock');
+      dock.innerHTML = `
+        <span class="sim-dock-title">📡 Echo Chamber</span>
+        <button class="sim-action-btn" id="btn-surf-concrete" style="background: rgba(56, 189, 248, 0.35);">Hard Wall (Echo)</button>
+        <button class="sim-action-btn" id="btn-surf-foam">Acoustic Foam (Absorb)</button>
+        <button class="sim-action-btn" id="btn-ping">Sonar Ping 🔊</button>
+        <div class="sim-control-item">
+          <span>Wall Dist: <b id="lbl-dist">8.5m</b></span>
+          <input type="range" id="slider-dist" min="2.6" max="5.0" step="0.1" value="${params.wallX}">
+        </div>
+      `;
+
+      const btnConcrete = document.getElementById('btn-surf-concrete');
+      const btnFoam = document.getElementById('btn-surf-foam');
+
+      btnConcrete.addEventListener('click', () => {
+        params.surface = "concrete";
+        wallMesh.material.color.setHex(0xe2e8f0);
+        wallMesh.material.roughness = 0.18;
+        wallMesh.material.metalness = 0.45;
+        btnConcrete.style.background = 'rgba(56, 189, 248, 0.35)';
+        btnFoam.style.background = '';
+        document.getElementById('announcer-text').textContent = "Hard smooth wall active: 95% acoustic reflection produces clear, powerful echoes!";
+      });
+
+      btnFoam.addEventListener('click', () => {
+        params.surface = "foam";
+        wallMesh.material.color.setHex(0x1e293b);
+        wallMesh.material.roughness = 0.95;
+        wallMesh.material.metalness = 0.05;
+        btnFoam.style.background = 'rgba(239, 68, 68, 0.35)';
+        btnConcrete.style.background = '';
+        document.getElementById('announcer-text').textContent = "Acoustic foam active: Porous open-cell structure absorbs sound vibrations — NO ECHO!";
+      });
+
+      document.getElementById('btn-ping').addEventListener('click', () => {
+        params.pingActive = true;
+        params.pingTimer = 0;
+        pingPulse.visible = true;
+        pingHalo.visible = true;
+        sfx.ping();
+        document.getElementById('announcer-text').textContent = "🔊 Sonar ping launched! Wavefront propagating toward the barrier...";
+      });
+
+      document.getElementById('slider-dist').addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        params.wallX = val;
+        wallGroup.position.x = val;
+        const virtualDist = Math.round((val + 4.5) * 1.15 * 10) / 10;
+        document.getElementById('lbl-dist').textContent = virtualDist + 'm';
+        document.getElementById('announcer-text').textContent = `Wall moved to distance ${virtualDist}m. Echo return time adjusts proportionally: t = 2d / v!`;
+      });
+
+      return g;
+    }
+
+    // --- TOPIC 3: STRUCTURES OF THE EARTH SIMULATION ---
+    function buildEarthStructuresSim() {
+      const g = new THREE.Group();
+      g.position.set(0, 2.2, 0);
+
+      // 3D Layered Cutaway Earth Model
+      const crustGeo = new THREE.SphereGeometry(3.0, 48, 32, 0, Math.PI * 1.55);
+      const crustMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.7, metalness: 0.1 });
+      const crustMesh = new THREE.Mesh(crustGeo, crustMat);
+      g.add(crustMesh);
+
+      // Continent green patches on crust
+      const contGeo = new THREE.SphereGeometry(3.01, 32, 24, 0, Math.PI * 1.55);
+      const contMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.85 });
+      const contMesh = new THREE.Mesh(contGeo, contMat);
+      g.add(contMesh);
+
+      // Mantle Layer (Convective magma amber)
+      const mantleGeo = new THREE.SphereGeometry(2.5, 40, 28, 0, Math.PI * 1.55);
+      const mantleMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.6, emissive: 0xb45309, emissiveIntensity: 0.35 });
+      const mantleMesh = new THREE.Mesh(mantleGeo, mantleMat);
+      g.add(mantleMesh);
+
+      // Outer Core Layer (Liquid Molten Iron - Bright Yellow/Orange)
+      const outerCoreGeo = new THREE.SphereGeometry(1.7, 36, 24, 0, Math.PI * 1.55);
+      const outerCoreMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.7, roughness: 0.3 });
+      const outerCoreMesh = new THREE.Mesh(outerCoreGeo, outerCoreMat);
+      g.add(outerCoreMesh);
+
+      // Inner Core Layer (Solid Glowing Crystal Center)
+      const innerCoreGeo = new THREE.SphereGeometry(0.9, 32, 24);
+      const innerCoreMat = new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xfacc15, emissiveIntensity: 1.2, roughness: 0.1 });
+      const innerCoreMesh = new THREE.Mesh(innerCoreGeo, innerCoreMat);
+      g.add(innerCoreMesh);
+
+      // Magnetic Dipole Field Lines
+      const magGroup = new THREE.Group();
+      for (let i = 0; i < 6; i++) {
+        const torus = new THREE.Mesh(
+          new THREE.TorusGeometry(3.8 + i * 0.45, 0.03, 10, 48),
+          new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 })
+        );
+        torus.rotation.y = (i * Math.PI) / 3;
+        magGroup.add(torus);
+      }
+      g.add(magGroup);
+
+      // Seismic P & S Wave paths
+      const seismicGroup = new THREE.Group();
+      const pLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 3.0, 0),
+          new THREE.Vector3(0.5, 1.2, 0),
+          new THREE.Vector3(-0.4, -2.9, 0)
+        ]),
+        new THREE.LineBasicMaterial({ color: 0x22c55e, linewidth: 2 })
+      );
+      seismicGroup.add(pLine);
+      g.add(seismicGroup);
+
+      topicUpdaters.push((delta, time) => {
+        g.rotation.y += delta * 0.15;
+        magGroup.rotation.y += delta * 0.25;
+      });
+
+      // Render Dock Controls
+      const dock = document.getElementById('sim-dock');
+      dock.innerHTML = `
+        <span class="sim-dock-title">🌍 Earth Core</span>
+        <button class="sim-action-btn" id="btn-mag">Toggle Magnetic Field</button>
+        <button class="sim-action-btn" id="btn-seismic">Seismic P/S Waves</button>
+      `;
+
+      let magVisible = true;
+      document.getElementById('btn-mag').addEventListener('click', () => {
+        magVisible = !magVisible;
+        magGroup.visible = magVisible;
+        document.getElementById('announcer-text').textContent = magVisible
+          ? "Geomagnetic dynamo active: Molten outer core convection sustains Earth's magnetic shield!"
+          : "Magnetic field hidden.";
+      });
+      document.getElementById('btn-seismic').addEventListener('click', () => {
+        sfx.ping();
+        document.getElementById('announcer-text').textContent = "P-waves pass through the liquid outer core; S-waves are blocked, creating the S-wave shadow zone!";
+      });
+
+      return g;
+    }
+
+    // --- TOPIC 4: CHANGES IN THE EARTH SIMULATION ---
+    function buildChangesSim() {
+      const g = new THREE.Group();
+      g.position.set(0, 1.8, 0);
+
+      // Left Tectonic Plate (Continental)
+      const leftPlate = new THREE.Group();
+      leftPlate.position.set(-1.8, 0, 0);
+      const lRock = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.8, 3.6), new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 }));
+      const lCrust = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.15, 3.6), new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.9 }));
+      lCrust.position.y = 0.45;
+      leftPlate.add(lRock);
+      leftPlate.add(lCrust);
+
+      // Volcano cone on left plate
+      const volcano = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.6, 16), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 }));
+      volcano.position.set(0.6, 1.2, 0);
+      leftPlate.add(volcano);
+
+      g.add(leftPlate);
+
+      // Right Tectonic Plate (Oceanic subducting plate)
+      const rightPlate = new THREE.Group();
+      rightPlate.position.set(2.0, 0, 0);
+      const rRock = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.6, 3.6), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 }));
+      const rOcean = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.2, 3.6), new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.2, transparent: true, opacity: 0.75 }));
+      rOcean.position.y = 0.38;
+      rightPlate.add(rRock);
+      rightPlate.add(rOcean);
+      g.add(rightPlate);
+
+      // Lava eruption particles
+      const lavaGeo = new THREE.BufferGeometry();
+      const pCount = 80;
+      const pos = new Float32Array(pCount * 3);
+      for (let i = 0; i < pCount; i++) {
+        pos[i * 3] = -1.2 + (Math.random() - 0.5) * 0.4;
+        pos[i * 3 + 1] = 2.8 + Math.random() * 1.5;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
+      }
+      lavaGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const lavaMat = new THREE.PointsMaterial({ color: 0xef4444, size: 0.18, transparent: true });
+      const lavaSparks = new THREE.Points(lavaGeo, lavaMat);
+      g.add(lavaSparks);
+
+      topicUpdaters.push((delta, time) => {
+        // Gentle tectonic pulsing
+        const drift = Math.sin(time * 0.8) * 0.08;
+        leftPlate.position.x = -1.8 + drift;
+        rightPlate.position.x = 2.0 - drift;
+
+        // Lava eruption particle fountain
+        const arr = lavaGeo.attributes.position.array;
+        for (let i = 0; i < pCount; i++) {
+          arr[i * 3 + 1] += delta * 2.2;
+          if (arr[i * 3 + 1] > 4.5) {
+            arr[i * 3 + 1] = 2.8;
+            arr[i * 3] = -1.2 + (Math.random() - 0.5) * 0.3;
+          }
+        }
+        lavaGeo.attributes.position.needsUpdate = true;
+      });
+
+      // Render Dock Controls
+      const dock = document.getElementById('sim-dock');
+      dock.innerHTML = `
+        <span class="sim-dock-title">🌋 Plate Tectonics</span>
+        <button class="sim-action-btn" id="btn-quake">Trigger Earthquake ⚡</button>
+        <button class="sim-action-btn" id="btn-erupt">Erupt Volcano 🌋</button>
+      `;
+
+      document.getElementById('btn-quake').addEventListener('click', () => {
+        sfx.buzz();
+        // Camera shake
+        const origX = camera.position.x;
+        let count = 0;
+        const shk = setInterval(() => {
+          camera.position.x = origX + (Math.random() - 0.5) * 0.5;
+          if (++count > 12) {
+            clearInterval(shk);
+            camera.position.x = origX;
+          }
+        }, 30);
+        document.getElementById('announcer-text').textContent = "Earthquake triggered! Transform fault elastic strain released with seismic tremors!";
+      });
+
+      document.getElementById('btn-erupt').addEventListener('click', () => {
+        sfx.buzz();
+        document.getElementById('announcer-text').textContent = "Volcanic eruption! Subducting oceanic crust melts into buoyant magma chambers!";
+      });
+
+      return g;
+    }
+
+    // --- TOPIC 5: SOLAR AND LUNAR ECLIPSES SIMULATION ---
+    function buildEclipseSim() {
+      const g = new THREE.Group();
+      g.position.set(0, 1.8, 0);
+
+      // The Sun (Far Left)
+      const sun = new THREE.Mesh(
+        new THREE.SphereGeometry(1.6, 32, 24),
+        new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xf59e0b, emissiveIntensity: 1.8, roughness: 0.1 })
+      );
+      sun.position.set(-6.0, 0, 0);
+      g.add(sun);
+
+      const sunLight = new THREE.PointLight(0xffedd5, 12, 30);
+      sunLight.position.set(-6.0, 0, 0);
+      g.add(sunLight);
+
+      // Earth (Center)
+      const earth = new THREE.Mesh(
+        new THREE.SphereGeometry(1.2, 32, 24),
+        new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 })
+      );
+      earth.position.set(1.5, 0, 0);
+      g.add(earth);
+
+      // Moon Pivot & Moon Sphere
+      const moonPivot = new THREE.Group();
+      moonPivot.position.set(1.5, 0, 0);
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.38, 24, 16),
+        new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.9 })
+      );
+      moon.position.set(-2.4, 0, 0); // Positioned between Sun and Earth for Solar Eclipse
+      moonPivot.add(moon);
+      g.add(moonPivot);
+
+      // Shadow Cone (Umbra)
+      const shadowConeGeo = new THREE.ConeGeometry(0.5, 3.2, 24);
+      const shadowConeMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.65 });
+      const shadowCone = new THREE.Mesh(shadowConeGeo, shadowConeMat);
+      shadowCone.rotation.z = Math.PI / 2;
+      shadowCone.position.set(-0.8, 0, 0);
+      g.add(shadowCone);
+
+      let mode = "solar"; // "solar" | "lunar"
+
+      topicUpdaters.push((delta, time) => {
+        if (mode === "solar") {
+          moonPivot.rotation.y = Math.sin(time * 0.4) * 0.15; // Align near Sun-Earth line
+          moon.material.color.setHex(0x94a3b8);
+        } else {
+          moonPivot.rotation.y = Math.PI + Math.sin(time * 0.4) * 0.15; // Behind Earth for Lunar Eclipse
+          moon.material.color.setHex(0xd97706); // Blood-red Moon!
+        }
+      });
+
+      // Render Dock Controls
+      const dock = document.getElementById('sim-dock');
+      dock.innerHTML = `
+        <span class="sim-dock-title">🌑 Eclipse Orrery</span>
+        <button class="sim-action-btn" id="btn-solar">Solar Eclipse (Sun-Moon-Earth)</button>
+        <button class="sim-action-btn" id="btn-lunar">Lunar Eclipse (Blood Moon)</button>
+      `;
+
+      document.getElementById('btn-solar').addEventListener('click', () => {
+        mode = "solar";
+        document.getElementById('announcer-text').textContent = "Solar Eclipse: Moon aligns between Sun and Earth, projecting its umbral shadow cone!";
+      });
+      document.getElementById('btn-lunar').addEventListener('click', () => {
+        mode = "lunar";
+        document.getElementById('announcer-text').textContent = "Lunar Eclipse: Earth aligns between Sun and Moon. Rayleigh scattering turns the Moon blood-red!";
+      });
+
+      return g;
+    }
+
+    // Function to load the active topic simulation into the 3D scene
+    function switchTopicSimulation(topicIndex) {
+      // Clear old models and updaters
+      sfx.stopTone();
+      topicUpdaters = [];
+      while (activeSimulationGroup.children.length > 0) {
+        const obj = activeSimulationGroup.children[0];
+        activeSimulationGroup.remove(obj);
+      }
+
+      let simMesh;
+      if (topicIndex === 0) simMesh = buildSoundWavesSim();
+      else if (topicIndex === 1) simMesh = buildReflectionsSim();
+      else if (topicIndex === 2) simMesh = buildEarthStructuresSim();
+      else if (topicIndex === 3) simMesh = buildChangesSim();
+      else if (topicIndex === 4) simMesh = buildEclipseSim();
+
+      if (simMesh) activeSimulationGroup.add(simMesh);
+    }
+
+    /* ==========================================================
+       7. UI DATA BINDING & BUZZER BATTLE LOGIC
+       ========================================================== */
+    const teamAHeader = document.getElementById('team-a-header');
+    const teamBHeader = document.getElementById('team-b-header');
+    const teamAConsole = document.getElementById('team-a-console');
+    const teamBConsole = document.getElementById('team-b-console');
+
+    const teamAScore = document.getElementById('team-a-score');
+    const teamBScore = document.getElementById('team-b-score');
+    const teamAStreak = document.getElementById('team-a-streak');
+    const teamBStreak = document.getElementById('team-b-streak');
+
+    const teamABuzzBtn = document.getElementById('team-a-buzz-btn');
+    const teamBBuzzBtn = document.getElementById('team-b-buzz-btn');
+    const teamALockBtn = document.getElementById('team-a-lock-btn');
+    const teamBLockBtn = document.getElementById('team-b-lock-btn');
+
+    const announcerText = document.getElementById('announcer-text');
+    const timerSeconds = document.getElementById('timer-seconds');
+    const timerDisplay = document.getElementById('timer-display');
+
+    function updateQuestionUI() {
+      const topic = TOPICS_DATA[gameState.currentTopicIndex];
+      const q = topic.questions[gameState.currentQuestionIndex];
+
+      // Update Left Console (Team A - Wave Riders)
+      document.getElementById('team-a-topic-tag').textContent = `${topic.code} ${topic.short}`;
+      document.getElementById('team-a-qnum').textContent = `QUESTION ${gameState.currentQuestionIndex + 1} / ${topic.questions.length}`;
+      document.getElementById('team-a-question-text').textContent = q.q;
+      document.getElementById('team-a-clue-text').textContent = q.clue;
+
+      const optsA = document.getElementById('team-a-options');
+      optsA.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const letter = String.fromCharCode(65 + idx);
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="opt-letter">${letter}</span><span>${opt}</span>`;
+        btn.disabled = gameState.activeTurn !== 'a' || gameState.lockedOptions.a || gameState.answerRevealed;
+        if (gameState.selectedOptions.a === idx) btn.classList.add('selected-orange');
+        if (gameState.answerRevealed) {
+          if (idx === q.correct) btn.classList.add('correct-ans');
+          else if (gameState.selectedOptions.a === idx) btn.classList.add('wrong-ans');
+        }
+        btn.addEventListener('click', () => {
+          gameState.selectedOptions.a = idx;
+          teamALockBtn.disabled = false;
+          updateQuestionUI();
+        });
+        optsA.appendChild(btn);
+      });
+
+      // Update Right Console (Team B - Echo Team)
+      document.getElementById('team-b-topic-tag').textContent = `${topic.code} ${topic.short}`;
+      document.getElementById('team-b-qnum').textContent = `QUESTION ${gameState.currentQuestionIndex + 1} / ${topic.questions.length}`;
+      document.getElementById('team-b-question-text').textContent = q.q;
+      document.getElementById('team-b-clue-text').textContent = q.clue;
+
+      const optsB = document.getElementById('team-b-options');
+      optsB.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const letter = String.fromCharCode(65 + idx);
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="opt-letter">${letter}</span><span>${opt}</span>`;
+        btn.disabled = gameState.activeTurn !== 'b' || gameState.lockedOptions.b || gameState.answerRevealed;
+        if (gameState.selectedOptions.b === idx) btn.classList.add('selected-teal');
+        if (gameState.answerRevealed) {
+          if (idx === q.correct) btn.classList.add('correct-ans');
+          else if (gameState.selectedOptions.b === idx) btn.classList.add('wrong-ans');
+        }
+        btn.addEventListener('click', () => {
+          gameState.selectedOptions.b = idx;
+          teamBLockBtn.disabled = false;
+          updateQuestionUI();
+        });
+        optsB.appendChild(btn);
+      });
+
+      // Active buzzer & lock button states
+      teamAHeader.classList.toggle('active-turn', gameState.activeTurn === 'a');
+      teamBHeader.classList.toggle('active-turn', gameState.activeTurn === 'b');
+      teamAConsole.classList.toggle('active-turn', gameState.activeTurn === 'a');
+      teamBConsole.classList.toggle('active-turn', gameState.activeTurn === 'b');
+
+      teamABuzzBtn.disabled = gameState.activeTurn !== null || gameState.team1Attempted || gameState.answerRevealed;
+      teamBBuzzBtn.disabled = gameState.activeTurn !== null || gameState.team2Attempted || gameState.answerRevealed;
+
+      teamALockBtn.disabled = gameState.activeTurn !== 'a' || gameState.selectedOptions.a === null || gameState.lockedOptions.a || gameState.answerRevealed;
+      teamBLockBtn.disabled = gameState.activeTurn !== 'b' || gameState.selectedOptions.b === null || gameState.lockedOptions.b || gameState.answerRevealed;
+
+      // Update Scores & Streaks
+      teamAScore.textContent = gameState.scores.a;
+      teamBScore.textContent = gameState.scores.b;
+      teamAStreak.innerHTML = `<span>⚡</span> ${gameState.streaks.a}x Streak`;
+      teamBStreak.innerHTML = `<span>⚡</span> ${gameState.streaks.b}x Streak`;
+    }
+
+    // BUZZER TRIGGER HANDLERS
+    function buzzTeam(team) {
+      if (gameState.activeTurn !== null || gameState.answerRevealed) return;
+      if (team === 'a' && gameState.team1Attempted) return;
+      if (team === 'b' && gameState.team2Attempted) return;
+
+      sfx.buzz();
+      gameState.activeTurn = team;
+
+      if (team === 'a') {
+        announcerText.textContent = "⚡ WAVE RIDERS buzzed in first! Choose an answer and lock it in.";
+      } else {
+        announcerText.textContent = "⚡ ECHO TEAM buzzed in first! Choose an answer and lock it in.";
+      }
+      updateQuestionUI();
+    }
+
+    teamABuzzBtn.addEventListener('click', () => buzzTeam('a'));
+    teamBBuzzBtn.addEventListener('click', () => buzzTeam('b'));
+
+    // KEYBOARD SHORTCUTS: 'A' for Wave Riders, 'L' for Echo Team
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'a' || e.key === 'A') {
+        buzzTeam('a');
+      } else if (e.key === 'l' || e.key === 'L') {
+        buzzTeam('b');
+      }
+    });
+
+    /* ==========================================================
+       MASCOT FEEDBACK MODAL CONTROLLER
+       ========================================================== */
+    let mascotCountdownTimer = null;
+
+    function showMascotModal({ isCorrect, team, points, streak, message, clue, canSteal, opponentTeam, onContinue }) {
+      const modal = document.getElementById('mascot-modal');
+      const card = document.getElementById('mascot-card');
+      const badge = document.getElementById('mascot-badge');
+      const aura = document.getElementById('mascot-aura');
+      const speechTitle = document.getElementById('mascot-speech-title');
+      const speechText = document.getElementById('mascot-speech-text');
+      const bonusPill = document.getElementById('mascot-bonus-pill');
+      const countdownBar = document.getElementById('mascot-countdown-bar');
+      const countdownLabel = document.getElementById('mascot-countdown-label');
+      const actionBtn = document.getElementById('mascot-action-btn');
+
+      if (mascotCountdownTimer) {
+        clearInterval(mascotCountdownTimer);
+        mascotCountdownTimer = null;
+      }
+
+      card.classList.toggle('correct-mode', isCorrect);
+      card.classList.toggle('wrong-mode', !isCorrect);
+
+      if (isCorrect) {
+        badge.className = 'mascot-badge badge-correct';
+        badge.innerHTML = `🌟 CORRECT ANSWER! (+${points} PTS)`;
+        aura.className = 'mascot-aura aura-correct';
+        speechTitle.textContent = `${team === 'a' ? 'Wave Riders' : 'Echo Team'} scored spot-on!`;
+        speechText.innerHTML = `<b>${message}</b><br><span style="color: #94a3b8; font-size: 0.8rem; margin-top: 6px; display: block;">💡 Scientific Principle: ${clue}</span>`;
+        bonusPill.style.display = 'inline-flex';
+        bonusPill.innerHTML = `⚡ ${streak}x Streak Multiplier Active! (+${points} Pts Total)`;
+        actionBtn.textContent = 'Next Challenge ➔';
+      } else {
+        badge.className = 'mascot-badge badge-wrong';
+        aura.className = 'mascot-aura aura-wrong';
+        bonusPill.style.display = 'none';
+
+        if (canSteal) {
+          badge.innerHTML = `🛡️ SHIELD DEFENSE! STEAL OPPORTUNITY`;
+          speechTitle.textContent = `Earth's shield held! Steal for ${opponentTeam === 'a' ? 'Wave Riders' : 'Echo Team'}!`;
+          speechText.innerHTML = `<b>${team === 'a' ? 'Wave Riders' : 'Echo Team'}</b> chose an incorrect option. Terra's shield deflected the strike!<br><br><span style="color: #38bdf8; font-weight: 800;">⚡ ${opponentTeam === 'a' ? 'Wave Riders' : 'Echo Team'} can now buzz in to STEAL the points!</span><br><span style="color: #94a3b8; font-size: 0.8rem; margin-top: 4px; display: block;">💡 Clue: ${clue}</span>`;
+          actionBtn.textContent = `⚡ Take Steal (Key ${opponentTeam === 'a' ? 'A' : 'L'})`;
+        } else {
+          badge.innerHTML = `❌ BOTH TEAMS SHIELDED!`;
+          speechTitle.textContent = `Terra Guardian's Debrief:`;
+          speechText.innerHTML = `Both teams missed this inquiry. <b>The correct answer is: ${message}</b><br><span style="color: #94a3b8; font-size: 0.8rem; margin-top: 6px; display: block;">💡 Key Concept: ${clue}</span>`;
+          actionBtn.textContent = 'Continue to Next Question ➔';
+        }
+      }
+
+      // Auto-advance countdown timer
+      const duration = canSteal ? 4.0 : 4.5;
+      let remaining = duration;
+      countdownBar.style.width = '100%';
+      countdownLabel.textContent = `Auto-proceeding in ${Math.ceil(remaining)}s...`;
+
+      const stepMs = 50;
+      mascotCountdownTimer = setInterval(() => {
+        remaining -= stepMs / 1000;
+        const pct = Math.max(0, (remaining / duration) * 100);
+        countdownBar.style.width = `${pct}%`;
+        countdownLabel.textContent = `Auto-proceeding in ${Math.max(1, Math.ceil(remaining))}s...`;
+
+        if (remaining <= 0) {
+          clearInterval(mascotCountdownTimer);
+          mascotCountdownTimer = null;
+          closeMascotModal();
+          if (onContinue) onContinue();
+        }
+      }, stepMs);
+
+      actionBtn.onclick = () => {
+        if (mascotCountdownTimer) {
+          clearInterval(mascotCountdownTimer);
+          mascotCountdownTimer = null;
+        }
+        closeMascotModal();
+        if (onContinue) onContinue();
+      };
+
+      modal.classList.add('open');
+    }
+
+    function closeMascotModal() {
+      const modal = document.getElementById('mascot-modal');
+      modal.classList.remove('open');
+    }
+
+    // LOCK ANSWER HANDLERS
+    function lockAnswer(team) {
+      if (gameState.activeTurn !== team || gameState.answerRevealed) return;
+      const topic = TOPICS_DATA[gameState.currentTopicIndex];
+      const q = topic.questions[gameState.currentQuestionIndex];
+      const chosen = team === 'a' ? gameState.selectedOptions.a : gameState.selectedOptions.b;
+
+      if (chosen === null) return;
+
+      if (team === 'a') gameState.lockedOptions.a = true;
+      else gameState.lockedOptions.b = true;
+
+      const isCorrect = chosen === q.correct;
+      const opponent = team === 'a' ? 'b' : 'a';
+
+      if (isCorrect) {
+        sfx.correct();
+        gameState.answerRevealed = true;
+        gameState.streaks[team] += 1;
+        const multiplier = Math.min(gameState.streaks[team], 3);
+        const pts = q.points * multiplier;
+        gameState.scores[team] += pts;
+
+        if (window.confetti) {
+          window.confetti({ particleCount: 80, spread: 70, origin: { y: 0.55 } });
+        }
+
+        announcerText.textContent = `🎯 Correct! ${team === 'a' ? 'Wave Riders' : 'Echo Team'} scored +${pts} pts (${multiplier}x streak)!`;
+        updateQuestionUI();
+
+        showMascotModal({
+          isCorrect: true,
+          team: team,
+          points: pts,
+          streak: multiplier,
+          message: q.options[q.correct],
+          clue: q.clue,
+          canSteal: false,
+          opponentTeam: opponent,
+          onContinue: () => advanceQuestion()
+        });
+      } else {
+        sfx.wrong();
+        gameState.streaks[team] = 0;
+        if (team === 'a') gameState.team1Attempted = true;
+        else gameState.team2Attempted = true;
+
+        const otherAttempted = team === 'a' ? gameState.team2Attempted : gameState.team1Attempted;
+
+        if (!otherAttempted) {
+          // STEAL OPPORTUNITY!
+          gameState.activeTurn = opponent;
+          announcerText.textContent = `❌ Incorrect! ${opponent === 'a' ? 'Wave Riders' : 'Echo Team'} has a STEAL OPPORTUNITY!`;
+          updateQuestionUI();
+
+          showMascotModal({
+            isCorrect: false,
+            team: team,
+            points: 0,
+            streak: 0,
+            message: `Selected: "${q.options[chosen]}"`,
+            clue: q.clue,
+            canSteal: true,
+            opponentTeam: opponent,
+            onContinue: () => {
+              announcerText.textContent = `⚡ Steal active! ${opponent === 'a' ? 'Wave Riders' : 'Echo Team'}, select an answer and lock it in!`;
+            }
+          });
+        } else {
+          // Both missed
+          gameState.answerRevealed = true;
+          announcerText.textContent = `❌ Both teams missed! The correct answer was option ${String.fromCharCode(65 + q.correct)}.`;
+          updateQuestionUI();
+
+          showMascotModal({
+            isCorrect: false,
+            team: team,
+            points: 0,
+            streak: 0,
+            message: `Option ${String.fromCharCode(65 + q.correct)}: "${q.options[q.correct]}"`,
+            clue: q.clue,
+            canSteal: false,
+            opponentTeam: opponent,
+            onContinue: () => advanceQuestion()
+          });
+        }
+      }
+    }
+
+    teamALockBtn.addEventListener('click', () => lockAnswer('a'));
+    teamBLockBtn.addEventListener('click', () => lockAnswer('b'));
+
+    // ADVANCE QUESTION OR TOPIC
+    function advanceQuestion() {
+      const topic = TOPICS_DATA[gameState.currentTopicIndex];
+      if (gameState.currentQuestionIndex < topic.questions.length - 1) {
+        gameState.currentQuestionIndex++;
+        resetRoundState();
+      } else {
+        // Topic finished! Advance topic or finish championship
+        if (gameState.currentTopicIndex < TOPICS_DATA.length - 1) {
+          switchTopic(gameState.currentTopicIndex + 1);
+        } else {
+          showVictory();
+        }
+      }
+    }
+
+    function resetRoundState() {
+      gameState.activeTurn = null;
+      gameState.team1Attempted = false;
+      gameState.team2Attempted = false;
+      gameState.selectedOptions.a = null;
+      gameState.selectedOptions.b = null;
+      gameState.lockedOptions.a = false;
+      gameState.lockedOptions.b = false;
+      gameState.answerRevealed = false;
+      gameState.timeLeft = 60;
+      updateQuestionUI();
+    }
+
+    function switchTopic(idx) {
+      gameState.currentTopicIndex = idx;
+      gameState.currentQuestionIndex = 0;
+      resetRoundState();
+      switchTopicSimulation(idx);
+
+      // Update Stepper buttons
+      document.querySelectorAll('.topic-step-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === idx);
+      });
+
+      announcerText.textContent = `Moved to Topic ${idx + 1}: ${TOPICS_DATA[idx].title}. Buzz in when ready!`;
+    }
+
+    // Top Stepper Clicks
+    document.querySelectorAll('.topic-step-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const topicId = parseInt(btn.dataset.topic);
+        switchTopic(topicId);
+      });
+    });
+
+    document.getElementById('next-stage-btn').addEventListener('click', () => {
+      if (gameState.currentTopicIndex < TOPICS_DATA.length - 1) {
+        switchTopic(gameState.currentTopicIndex + 1);
+      } else {
+        showVictory();
+      }
+    });
+
+    document.getElementById('restart-round-btn').addEventListener('click', () => {
+      resetRoundState();
+      announcerText.textContent = "Round restarted. Hit your team buzzer to begin!";
+    });
+
+    // ROUND TIMER COUNTDOWN
+    function startTimer() {
+      if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+      gameState.timerInterval = setInterval(() => {
+        if (!gameState.answerRevealed && gameState.timeLeft > 0) {
+          gameState.timeLeft--;
+          timerSeconds.textContent = gameState.timeLeft + 's';
+          if (gameState.timeLeft <= 10) {
+            timerDisplay.classList.add('urgent');
+            sfx.tick();
+          } else {
+            timerDisplay.classList.remove('urgent');
+          }
+          if (gameState.timeLeft === 0) {
+            sfx.wrong();
+            gameState.answerRevealed = true;
+            announcerText.textContent = "⏰ Time's up! Moving to the next inquiry.";
+            updateQuestionUI();
+            setTimeout(() => advanceQuestion(), 3000);
+          }
+        }
+      }, 1000);
+    }
+    startTimer();
+
+    // VICTORY CELEBRATION
+    const victoryModal = document.getElementById('victory-modal');
+    function showVictory() {
+      sfx.correct();
+      if (window.confetti) {
+        window.confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
+      }
+      const scoreA = gameState.scores.a;
+      const scoreB = gameState.scores.b;
+      document.getElementById('final-score-a').textContent = scoreA;
+      document.getElementById('final-score-b').textContent = scoreB;
+
+      const headline = document.getElementById('victory-headline');
+      if (scoreA > scoreB) {
+        headline.textContent = "🏆 WAVE RIDERS WIN THE CHAMPIONSHIP!";
+        headline.style.color = "var(--orange)";
+      } else if (scoreB > scoreA) {
+        headline.textContent = "🏆 ECHO TEAM WINS THE CHAMPIONSHIP!";
+        headline.style.color = "var(--teal)";
+      } else {
+        headline.textContent = "🤝 IT'S A CHAMPIONSHIP TIE!";
+        headline.style.color = "var(--gold)";
+      }
+
+      victoryModal.classList.add('open');
+    }
+
+    document.getElementById('rematch-btn').addEventListener('click', () => {
+      victoryModal.classList.remove('open');
+      gameState.scores.a = 0;
+      gameState.scores.b = 0;
+      gameState.streaks.a = 0;
+      gameState.streaks.b = 0;
+      switchTopic(0);
+    });
+
+    document.getElementById('close-victory-btn').addEventListener('click', () => {
+      victoryModal.classList.remove('open');
+    });
+
+    /* ==========================================================
+       8. MAIN RENDER LOOP & RESIZE HANDLER
+       ========================================================== */
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Run active simulation dynamic animations
+      topicUpdaters.forEach(updater => updater(delta, time));
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize Topic 1 on load
+    switchTopicSimulation(0);
+    updateQuestionUI();
+  </script>
+</body>
+</html>

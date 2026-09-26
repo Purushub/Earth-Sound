@@ -31,39 +31,39 @@ export const topics: Topic[] = [
     code: "6.1",
     title: "Sound Waves",
     short: "Sound Waves",
-    stageLabel: "Longitudinal Wave Physics",
+    stageLabel: "Vibrations & Sound Energy",
     questions: [
       {
-        q: "How does a sound wave travel through air?",
-        clue: "Watch the air molecules compress and spread as the source vibrates back and forth.",
+        q: "How does sound travel from a vibrating object through the air to your ear?",
+        clue: "Watch the air particles: they bump into their neighbors and bounce back in waves!",
         options: [
-          "Particles vibrate parallel to wave direction (Longitudinal)",
-          "Particles move in circular loops like surface water waves",
-          "Particles travel bodily from speaker to listener's ear",
-          "Air molecules stay completely frozen in place"
+          "Air particles vibrate back and forth, passing energy along like dominoes",
+          "Air particles shoot across the room like tiny bullets",
+          "Sound travels through empty space without touching any particles",
+          "Air particles stay completely frozen in place"
         ],
         correct: 0,
         points: 25
       },
       {
-        q: "Why can sound NOT travel through the vacuum of outer space?",
-        clue: "Mechanical waves require particles to collide and pass energy forward.",
+        q: "Why is outer space completely silent?",
+        clue: "Sound is a mechanical wave — it needs a material made of particles to travel.",
         options: [
           "Space is too cold for sound energy to exist",
-          "Sound requires a physical material medium of particles to propagate",
-          "Solar radiation neutralizes acoustic vibrations instantly",
-          "Zero gravity pulls sound waves downward"
+          "Space is a vacuum with no air or particles to carry vibrations",
+          "The Sun's bright light destroys all sound waves",
+          "Zero gravity pulls sound waves apart"
         ],
         correct: 1,
         points: 30
       },
       {
-        q: "In which of the following media does sound travel the fastest?",
-        clue: "Tightly bound molecules transfer vibrational impulses with greatest speed.",
+        q: "Through which state of matter does sound travel the FASTEST?",
+        clue: "When particles are packed tightly close together, vibrations pass along much quicker!",
         options: [
-          "Solids (e.g. Granite / Steel)",
-          "Liquids (e.g. Ocean Water)",
-          "Gases (e.g. Room Air)",
+          "Solids (e.g. Steel or Wood)",
+          "Liquids (e.g. Water)",
+          "Gases (e.g. Air)",
           "A complete vacuum"
         ],
         correct: 0,
@@ -75,43 +75,43 @@ export const topics: Topic[] = [
     code: "6.2",
     title: "Reflections of Sound",
     short: "Reflections",
-    stageLabel: "Echo Chamber & Sonar",
+    stageLabel: "Echoes & Echolocation",
     questions: [
       {
-        q: "Which surface produces the clearest and strongest echo?",
-        clue: "Rigid, non-porous surfaces bounce acoustic wavefronts with minimal dissipation.",
+        q: "What causes an echo when you shout in a large empty hall or cave?",
+        clue: "An echo is a sound wave bouncing off a surface, just like light bounces off a mirror.",
         options: [
-          "Heavy velvet theater drapery",
-          "Porous open-cell acoustic foam",
-          "A smooth, flat, rigid concrete wall",
-          "A mound of loose fiberglass wool"
+          "Sound waves bounce off hard, flat walls and return to your ears",
+          "The air traps your voice and replays it after a delay",
+          "The walls create a brand new voice of their own",
+          "Sound waves lose all their energy and turn around"
         ],
-        correct: 2,
+        correct: 0,
         points: 25
       },
       {
-        q: "A ship sends a sonar pulse to the seabed. In seawater (v = 1500 m/s), echo returns in 2.0s. Depth?",
-        clue: "Sound travels down and reflects back up (round trip): d = (v × t) / 2.",
+        q: "Which of these materials is BEST for absorbing sound to prevent loud echoes in a cinema?",
+        clue: "Soft, porous materials trap sound vibrations instead of letting them bounce.",
         options: [
-          "3000 meters",
-          "1500 meters",
-          "750 meters",
-          "6000 meters"
-        ],
-        correct: 1,
-        points: 35
-      },
-      {
-        q: "What law governs sound wave reflection off a flat barrier?",
-        clue: "Sound reflections follow identical geometric angle laws as light rays.",
-        options: [
-          "Angle of Incidence = Angle of Reflection (i = r)",
-          "Sound only reflects perpendicular at a 90° angle",
-          "The reflected angle is always half the incident angle",
-          "Reflected waves change frequency completely"
+          "Soft, thick acoustic curtains and foam panels",
+          "A smooth, flat, rigid concrete wall",
+          "A shiny polished metal sheet",
+          "A large sheet of smooth glass"
         ],
         correct: 0,
         points: 30
+      },
+      {
+        q: "How do bats and submarines use echoes to find objects in the dark or deep ocean?",
+        clue: "They send out sound pulses and measure how long it takes for the bounce to return!",
+        options: [
+          "They emit sound waves and listen to the returning echo (Echolocation / Sonar)",
+          "They use sound waves like flashlights to shine bright light",
+          "They make loud noises to scare obstacles out of the way",
+          "They listen to the thoughts of other creatures"
+        ],
+        correct: 0,
+        points: 35
       }
     ]
   },
@@ -119,43 +119,43 @@ export const topics: Topic[] = [
     code: "6.3",
     title: "Structures of the Earth",
     short: "Earth Structures",
-    stageLabel: "Seismic Layers & Core Dynamo",
+    stageLabel: "Crust, Mantle & Core",
     questions: [
       {
-        q: "Which layer of the Earth is liquid and generates our protective magnetic field?",
-        clue: "Vigorous convection of molten iron-nickel fluid creates electrical dynamo currents.",
+        q: "What are the four main layers of the Earth, from the outside to the center?",
+        clue: "Start from the rocky surface we stand on, all the way down to the super-hot middle.",
         options: [
-          "Crust",
-          "Mantle",
-          "Outer Core",
-          "Inner Core"
+          "Atmosphere, Ocean, Crust, Magma",
+          "Crust, Mantle, Outer Core, Inner Core",
+          "Inner Core, Mantle, Crust, Atmosphere",
+          "Soil, Water, Rock, Core"
         ],
-        correct: 2,
+        correct: 1,
         points: 30
       },
       {
-        q: "Why is the Earth's Inner Core solid despite temperatures exceeding 5,000°C?",
-        clue: "Immense confining gravitational pressure forces iron atoms into a solid crystal lattice.",
+        q: "Which layer of the Earth is the thin, solid outer shell where all life exists?",
+        clue: "It is like the thin, crunchy shell of a hard-boiled egg!",
         options: [
-          "It is composed of cryogenic nitrogen ice",
-          "Extreme planetary pressure raises melting point above core temperature",
-          "It has cooled down completely over billions of years",
-          "It is shielded by an impenetrable vacuum layer"
+          "The Crust",
+          "The Mantle",
+          "The Outer Core",
+          "The Inner Core"
         ],
-        correct: 1,
-        points: 35
+        correct: 0,
+        points: 25
       },
       {
-        q: "How do geophysicists prove that Earth's outer core is in a liquid state?",
-        clue: "Shear waves (S-waves) cannot shear fluids and are blocked, creating a shadow zone.",
+        q: "What is the Earth's Inner Core like at the very center of our planet?",
+        clue: "Even though it is hotter than 5,000°C, crushing gravity and pressure keep it solid!",
         options: [
-          "Deep boreholes have reached the center of the Earth",
-          "S-waves cannot pass through liquids, creating an S-wave shadow zone",
-          "Volcanic magma comes straight from the core",
-          "Gravitational satellites detect hollow regions"
+          "A solid, super-hot metal ball of iron and nickel",
+          "A pool of frozen cryogenic ice",
+          "A giant hollow cave full of air",
+          "A bubbling lake of water and mud"
         ],
-        correct: 1,
-        points: 40
+        correct: 0,
+        points: 35
       }
     ]
   },
@@ -163,40 +163,40 @@ export const topics: Topic[] = [
     code: "6.4",
     title: "Changes in the Earth",
     short: "Earth Changes",
-    stageLabel: "Plate Tectonics & Volcanism",
+    stageLabel: "Plates, Quakes & Volcanoes",
     questions: [
       {
-        q: "What rises when two continental tectonic plates push together at a convergent boundary?",
-        clue: "Continental crust is too buoyant to subduct; it crumples and folds upward.",
+        q: "Earth's crust is divided into giant, slowly moving pieces of rock. What are they called?",
+        clue: "These giant slabs float very slowly on the softer, hotter mantle below.",
         options: [
-          "Massive folded mountain ranges (e.g. Himalayas)",
-          "Mid-ocean rift valleys with seafloor spreading",
-          "Abyssal ocean plains with zero elevation",
-          "Plates evaporate directly into the atmosphere"
+          "Tectonic Plates",
+          "Continental Bricks",
+          "Oceanic Puzzles",
+          "Gravity Blocks"
         ],
         correct: 0,
         points: 30
       },
       {
-        q: "What geological process occurs at divergent plate boundaries like the Mid-Atlantic Ridge?",
-        clue: "Tensional pulling allows mantle magma to rise and form fresh oceanic crust.",
+        q: "What natural event happens when two tectonic plates suddenly slip or grind past each other?",
+        clue: "The sudden release of trapped energy makes the ground shake violently!",
         options: [
-          "Plates separate and upwelling magma forms new oceanic crust",
-          "Continents subduct completely into deep ocean trenches",
-          "Plates lock together permanently without motion",
-          "Earth's diameter expands rapidly every year"
+          "An Earthquake",
+          "A Solar Eclipse",
+          "A sudden freeze of all oceans",
+          "Earth stops rotating"
         ],
         correct: 0,
-        points: 35
+        points: 30
       },
       {
-        q: "What sudden hazard is generated along transform boundaries (like the San Andreas Fault)?",
-        clue: "Horizontal grinding locks rock with friction until elastic strain snaps catastrophically.",
+        q: "What can form over millions of years when two continental plates slowly crash into each other?",
+        clue: "The immense force crumples and folds the rocky crust upward into towering peaks!",
         options: [
-          "Earthquakes caused by sudden release of locked frictional elastic strain",
-          "Formation of new island arcs and deep trenches",
-          "Quiet basaltic lava fountain plateaus",
-          "Instant evaporation of the continental shelf"
+          "Towering Mountain Ranges (like the Himalayas)",
+          "A bottomless trench with no rock",
+          "A perfectly flat desert with no rocks",
+          "The entire continent dissolves into the air"
         ],
         correct: 0,
         points: 35
@@ -207,42 +207,42 @@ export const topics: Topic[] = [
     code: "6.5",
     title: "Solar & Lunar Eclipses",
     short: "Eclipses",
-    stageLabel: "Celestial Orbital Alignment",
+    stageLabel: "Sun, Earth & Moon Shadows",
     questions: [
       {
-        q: "Which precise celestial alignment produces a Solar Eclipse on Earth?",
-        clue: "The Moon passes directly between the Sun and Earth, casting its shadow on Earth.",
+        q: "What happens during a Solar Eclipse?",
+        clue: "The Moon moves directly between the Sun and Earth, blocking out sunlight during the day.",
         options: [
-          "Sun — Earth — Moon",
-          "Sun — Moon — Earth",
-          "Earth — Sun — Moon",
-          "Moon — Earth — Sun"
+          "The Sun passes between the Earth and Moon",
+          "The Moon passes between the Sun and Earth, casting its shadow on Earth",
+          "The Earth passes between the Sun and the Moon",
+          "The Sun runs out of fuel for a few minutes"
         ],
         correct: 1,
         points: 35
       },
       {
-        q: "Why does the Moon appear copper / blood-red during a Total Lunar Eclipse?",
-        clue: "Sunlight is filtered by Earth's atmosphere, projecting red sunsets into the umbra.",
+        q: "What happens during a Lunar Eclipse?",
+        clue: "Earth moves directly between the Sun and Moon, casting Earth's shadow across the full Moon.",
         options: [
-          "The Moon's volcanic rock glows when cold",
-          "Earth's atmosphere scatters blue light but refracts red into the umbra",
-          "The Moon catches solar flares during totality",
-          "City lights from Earth illuminate the lunar surface"
+          "Earth passes between the Sun and Moon, casting its shadow on the Moon",
+          "The Moon falls out of orbit and hits Earth",
+          "The Moon passes in front of the Sun",
+          "The Moon turns completely invisible forever"
         ],
-        correct: 1,
-        points: 40
+        correct: 0,
+        points: 35
       },
       {
-        q: "What is the completely dark, inner cone region of an eclipse shadow called?",
-        clue: "The inner total shadow is distinct from the lighter outer penumbra.",
+        q: "Why must you NEVER look directly at a Solar Eclipse with your bare eyes?",
+        clue: "Even when mostly covered, the Sun's ultraviolet and infrared rays are intense enough to cause blindness.",
         options: [
-          "Penumbra",
-          "Umbra",
-          "Antumbra",
-          "Corona"
+          "The Sun's powerful rays can permanently burn and damage your eyes",
+          "The Moon releases toxic space gas during an eclipse",
+          "The eclipse creates blinding lightning bolts",
+          "It causes permanent loss of hearing"
         ],
-        correct: 1,
+        correct: 0,
         points: 30
       }
     ]
@@ -503,22 +503,86 @@ function Scene({ topicIndex }: { topicIndex: number }) {
 
 /* 1. SOUND WAVES SIMULATION */
 function SoundWavesSim() {
-  const coneRef = useRef<THREE.Mesh>(null);
+  const leftProngRef = useRef<THREE.Group>(null);
+  const rightProngRef = useRef<THREE.Group>(null);
   const drumRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-    if (coneRef.current) coneRef.current.position.x = 0.85 + Math.sin(t * 18) * 0.15;
-    if (drumRef.current) drumRef.current.position.x = -0.22 + Math.sin(t * 18 - 3) * 0.12;
+    const vib = Math.sin(t * 22) * 0.05;
+    if (leftProngRef.current) {
+      leftProngRef.current.position.z = -0.38 + vib;
+      leftProngRef.current.rotation.x = vib * 0.3;
+    }
+    if (rightProngRef.current) {
+      rightProngRef.current.position.z = 0.38 - vib;
+      rightProngRef.current.rotation.x = -vib * 0.3;
+    }
+    if (drumRef.current) drumRef.current.position.x = -0.22 + Math.sin(t * 22 - 3) * 0.08;
   });
 
   return (
     <group position={[0, 1.8, 0]}>
-      {/* Speaker chassis */}
+      {/* 3D Physics Tuning Fork & Wooden Resonance Box */}
       <group position={[-4.5, 0, 0]}>
-        <mesh><boxGeometry args={[1.6, 2.8, 1.8]} /><meshStandardMaterial color="#1e293b" roughness={0.6} /></mesh>
-        <mesh ref={coneRef} rotation-z={-Math.PI / 2} position={[0.85, 0, 0]}><cylinderGeometry args={[0.7, 0.2, 0.4, 32]} /><meshStandardMaterial color="#f97316" emissive="#c2410c" emissiveIntensity={0.5} /></mesh>
-        <Text position={[0, 1.7, 0]} fontSize={0.24} color="#f97316">SPEAKER // SOURCE</Text>
+        {/* Wooden resonance box */}
+        <mesh position={[0, -0.9, 0]}>
+          <boxGeometry args={[1.6, 0.9, 2.2]} />
+          <meshStandardMaterial color="#854d0e" roughness={0.45} metalness={0.1} />
+        </mesh>
+        {/* Sound aperture */}
+        <mesh position={[0.81, -0.9, 0]} rotation-z={Math.PI / 2}>
+          <cylinderGeometry args={[0.24, 0.24, 0.05, 32]} />
+          <meshStandardMaterial color="#1c1917" roughness={0.9} />
+        </mesh>
+        {/* Brass collar */}
+        <mesh position={[0, -0.35, 0]}>
+          <cylinderGeometry args={[0.22, 0.26, 0.25, 24]} />
+          <meshStandardMaterial color="#fbbf24" roughness={0.25} metalness={0.85} />
+        </mesh>
+        {/* Chrome Stem */}
+        <mesh position={[0, 0.05, 0]}>
+          <cylinderGeometry args={[0.12, 0.12, 0.65, 24]} />
+          <meshStandardMaterial color="#e2e8f0" roughness={0.12} metalness={0.95} emissive="#38bdf8" emissiveIntensity={0.15} />
+        </mesh>
+        {/* U-Base curve */}
+        <mesh position={[0, 0.38, 0]} rotation-y={Math.PI / 2} rotation-z={Math.PI}>
+          <torusGeometry args={[0.38, 0.1, 16, 32, Math.PI]} />
+          <meshStandardMaterial color="#e2e8f0" roughness={0.12} metalness={0.95} emissive="#38bdf8" emissiveIntensity={0.15} />
+        </mesh>
+        {/* Vibrating Prongs */}
+        <group ref={leftProngRef} position={[0, 0.38, -0.38]}>
+          <mesh position={[0, 1.1, 0]}>
+            <cylinderGeometry args={[0.09, 0.09, 2.2, 24]} />
+            <meshStandardMaterial color="#f1f5f9" roughness={0.12} metalness={0.92} emissive="#38bdf8" emissiveIntensity={0.2} />
+          </mesh>
+          <mesh position={[0, 2.2, 0]}>
+            <sphereGeometry args={[0.09, 16, 16]} />
+            <meshStandardMaterial color="#f1f5f9" roughness={0.12} metalness={0.92} />
+          </mesh>
+        </group>
+        <group ref={rightProngRef} position={[0, 0.38, 0.38]}>
+          <mesh position={[0, 1.1, 0]}>
+            <cylinderGeometry args={[0.09, 0.09, 2.2, 24]} />
+            <meshStandardMaterial color="#f1f5f9" roughness={0.12} metalness={0.92} emissive="#38bdf8" emissiveIntensity={0.2} />
+          </mesh>
+          <mesh position={[0, 2.2, 0]}>
+            <sphereGeometry args={[0.09, 16, 16]} />
+            <meshStandardMaterial color="#f1f5f9" roughness={0.12} metalness={0.92} />
+          </mesh>
+        </group>
+        {/* Striker Mallet */}
+        <group position={[-0.8, 1.8, -0.9]}>
+          <mesh rotation-x={Math.PI / 3}>
+            <cylinderGeometry args={[0.03, 0.04, 1.4, 16]} />
+            <meshStandardMaterial color="#d97706" roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 0.65, 0.38]}>
+            <sphereGeometry args={[0.18, 20, 20]} />
+            <meshStandardMaterial color="#1e293b" roughness={0.7} />
+          </mesh>
+        </group>
+        <Text position={[0, 2.8, 0]} fontSize={0.24} color="#38bdf8">TUNING FORK // 440 Hz</Text>
       </group>
 
       {/* Wavefront Rings */}

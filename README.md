@@ -14,7 +14,7 @@ An interactive, competitive 3D learning simulation activity for **Unit 06: Earth
 
 ### 2. 5 Distinct 3D Earth Physics Simulations
 1. **6.1 Sound Waves**:
-   - 3D acoustic speaker with vibrating diaphragm.
+   - 3D classic physics tuning fork with vibrating acoustic prongs and wooden resonance soundbox.
    - Longitudinal air particle grid (24 cols × 6 rows × 4 depth) demonstrating genuine compressions and rarefactions.
    - Resonating tympanic eardrum receiver.
    - Frequency ($200\text{ Hz} - 900\text{ Hz}$) & Amplitude sliders, plus real-time Web Audio pitch tone synthesizer.
